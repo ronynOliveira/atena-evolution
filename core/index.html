@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atena Evolução — Interface de IA</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: rgba(20, 20, 50, 0.9);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid rgba(100, 100, 255, 0.2);
+        }
+        
+        .header h1 {
+            font-size: 1.4rem;
+            background: linear-gradient(90deg, #7c7cff, #ff7cff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .status-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: #4caf50;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .main {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+        
+        .sidebar {
+            width: 280px;
+            background: rgba(15, 15, 40, 0.8);
+            border-right: 1px solid rgba(100, 100, 255, 0.15);
+            padding: 16px;
+            overflow-y: auto;
+        }
+        
+        .sidebar h3 {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .feature-list {
+            list-style: none;
+        }
+        
+        .feature-list li {
+            padding: 8px 12px;
+            margin-bottom: 4px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .feature-list li:hover {
+            background: rgba(100, 100, 255, 0.1);
+        }
+        
+        .feature-list li.active {
+            background: rgba(100, 100, 255, 0.2);
+            border-left: 3px solid #7c7cff;
+        }
+        
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+        }
+        
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+        
+        .message.user {
+            align-self: flex-end;
+            background: rgba(100, 100, 255, 0.2);
+            border: 1px solid rgba(100, 100, 255, 0.3);
+        }
+        
+        .message.assistant {
+            align-self: flex-start;
+            background: rgba(50, 50, 80, 0.6);
+            border: 1px solid rgba(100, 100, 255, 0.15);
+        }
+        
+        .message .meta {
+            font-size: 0.75rem;
+            color: #888;
+            margin-top: 4px;
+        }
+        
+        .input-area {
+            display: flex;
+            gap: 8px;
+            padding: 16px;
+            background: rgba(15, 15, 40, 0.6);
+            border-radius: 12px;
+            border: 1px solid rgba(100, 100, 255, 0.15);
+        }
+        
+        .input-area input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #e0e0e0;
+            font-size: 1rem;
+            outline: none;
+        }
+        
+        .input-area input::placeholder {
+            color: #666;
+        }
+        
+        .input-area button {
+            background: linear-gradient(135deg, #7c7cff, #5a5aff);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: opacity 0.2s;
+        }
+        
+        .input-area button:hover {
+            opacity: 0.85;
+        }
+        
+        .input-area button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .options {
+            display: flex;
+            gap: 12px;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+        }
+        
+        .options label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            color: #aaa;
+        }
+        
+        .options input[type="checkbox"] {
+            accent-color: #7c7cff;
+        }
+        
+        .typing-indicator {
+            display: none;
+            align-self: flex-start;
+            padding: 12px 16px;
+            background: rgba(50, 50, 80, 0.6);
+            border-radius: 12px;
+        }
+        
+        .typing-indicator span {
+            display: inline-block;
+            width: 8px; height: 8px;
+            background: #7c7cff;
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: typing 1.4s infinite;
+        }
+        
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-6px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="status-dot" id="statusDot"></div>
+        <h1>🧠 Atena Evolução</h1>
+        <span style="color: #666; font-size: 0.85rem; margin-left: auto;" id="statusText">Conectando...</span>
+    </div>
+    
+    <div class="main">
+        <div class="sidebar">
+            <h3>Recursos</h3>
+            <ul class="feature-list">
+                <li class="active" onclick="setMode('chat')">💬 Chat Inteligente</li>
+                <li onclick="setMode('rag')">📚 Pesquisa RAG</li>
+                <li onclick="setMode('research')">🔬 Pesquisa Acadêmica</li>
+                <li onclick="setMode('code')">💻 Geração de Código</li>
+                <li onclick="setMode('creative')">✨ Modo Criativo</li>
+            </ul>
+            
+            <h3 style="margin-top: 24px;">APIs</h3>
+            <ul class="feature-list">
+                <li onclick="quickAction('Clima em Diadema')">🌤️ Clima</li>
+                <li onclick="quickAction('Buscar na Wikipedia: ')">📖 Wikipedia</li>
+                <li onclick="quickAction('Pesquisar arXiv: ')">🔬 arXiv</li>
+                <li onclick="quickAction('Citação do dia')">💡 Citação</li>
+            </ul>
+        </div>
+        
+        <div class="chat-area">
+            <div class="messages" id="messages">
+                <div class="message assistant">
+                    Olá! Eu sou a <strong>Atena Evolução</strong>, sua IA cognitiva avançada. Como posso ajudar?
+                    <div class="meta">Atena Evolução v1.0</div>
+                </div>
+            </div>
+            
+            <div class="options">
+                <label><input type="checkbox" id="useRag"> Usar RAG</label>
+                <label><input type="checkbox" id="useApis" checked> Usar APIs gratuitas</label>
+            </div>
+            
+            <div class="input-area">
+                <input 
+                    type="text" 
+                    id="messageInput" 
+                    placeholder="Digite sua mensagem..." 
+                    onkeypress="if(event.key==='Enter')sendMessage()"
+                >
+                <button id="sendBtn" onclick="sendMessage()">Enviar</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let ws = null;
+        let currentMode = 'chat';
+        
+        function connect() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            ws = new WebSocket(`${protocol}//${window.location.host}/ws`);
+            
+            ws.onopen = () => {
+                document.getElementById('statusDot').style.background = '#4caf50';
+                document.getElementById('statusText').textContent = 'Online';
+            };
+            
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                
+                if (data.type === 'welcome') {
+                    addMessage(data.message, 'assistant');
+                } else if (data.type === 'response') {
+                    hideTyping();
+                    addMessage(data.content, 'assistant', {
+                        provider: data.provider,
+                        latency: data.latency_ms
+                    });
+                } else if (data.type === 'error') {
+                    hideTyping();
+                    addMessage('Erro: ' + data.message, 'assistant');
+                }
+            };
+            
+            ws.onclose = () => {
+                document.getElementById('statusDot').style.background = '#f44336';
+                document.getElementById('statusText').textContent = 'Desconectado';
+                setTimeout(connect, 3000);
+            };
+        }
+        
+        function addMessage(text, sender, meta = {}) {
+            const messages = document.getElementById('messages');
+            const div = document.createElement('div');
+            div.className = `message ${sender}`;
+            
+            let metaHtml = '';
+            if (meta.provider) {
+                metaHtml = `<div class="meta">${meta.provider} • ${meta.latency?.toFixed(0) || 0}ms</div>`;
+            }
+            
+            div.innerHTML = text + metaHtml;
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+        }
+        
+        function showTyping() {
+            const messages = document.getElementById('messages');
+            const div = document.createElement('div');
+            div.className = 'typing-indicator';
+            div.id = 'typing';
+            div.innerHTML = '<span></span><span></span><span></span>';
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+        }
+        
+        function hideTyping() {
+            const typing = document.getElementById('typing');
+            if (typing) typing.remove();
+        }
+        
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            addMessage(message, 'user');
+            input.value = '';
+            showTyping();
+            
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                    message: message,
+                    use_rag: document.getElementById('useRag').checked,
+                    use_apis: document.getElementById('useApis').checked,
+                    mode: currentMode,
+                }));
+            } else {
+                hideTyping();
+                addMessage('Erro: não conectado ao servidor.', 'assistant');
+            }
+        }
+        
+        function setMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.feature-list li').forEach(li => li.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+        
+        function quickAction(text) {
+            document.getElementById('messageInput').value = text;
+            sendMessage();
+        }
+        
+        // Conectar ao carregar
+        connect();
+    </script>
+</body>
+</html>
