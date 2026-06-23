@@ -1,0 +1,80 @@
+{
+  "pesquisa": "Agent Loops",
+  "data": "2026-06-23",
+  "fontes": [
+    "arXiv API",
+    "Wikipedia API"
+  ],
+  "resultados": [
+    {
+      "query": "agent loop autonomous AI",
+      "results": [
+        {
+          "title": "AutoDex: An Automated Real-World System for Dexterous Grasping Data Collection",
+          "published": "2026-06-22",
+          "link": "http://arxiv.org/abs/2606.23689v1",
+          "summary": "Learning robust dexterous grasping requires real-world data that records the physical outcomes of grasp attempts. Such data is hard to obtain at scale: teleoperation yields valid physical outcomes but is slow and operator-biased, while simulation-based generation is cheap and scalable but cannot cer"
+        },
+        {
+          "title": "Semantic Browsing: Controllable Diversity for Image Generation",
+          "published": "2026-06-22",
+          "link": "http://arxiv.org/abs/2606.23679v1",
+          "summary": "Modern text-to-image models excel in visual fidelity and prompt adherence. However, this strict adherence comes at the cost of diversity: generated samples tend to collapse into a single visual interpretation. Existing methods to improve diversity produce outputs driven by incidental variations rath"
+        },
+        {
+          "title": "IMAGIN-4D: Image-Guided Controllable Interaction Generation",
+          "published": "2026-06-22",
+          "link": "http://arxiv.org/abs/2606.23675v1",
+          "summary": "Generating human-object interactions (HOI) is central to character animation, robotics, AR/VR, and embodied AI. Recent HOI generation methods synthesize motion from text, object geometry, and sparse waypoints, controlling action semantics and object trajectories. However, these signals underspecify "
+        },
+        {
+          "title": "PsyBridge: A Hybrid Intelligent Framework for Multi-Dimensional Mental Health Assessment and Decision Support",
+          "published": "2026-06-22",
+          "link": "http://arxiv.org/abs/2606.23673v1",
+          "summary": "Mental health assessment commonly relies on isolated screening instruments or data-driven models that often lack interpretability and multi-dimensional integration. Existing approaches frequently focus on individual indicators such as depression or anxiety while providing limited support for compreh"
+        },
+        {
+          "title": "Teaching LLMs String Matching, Backtracking, and Error Recovery to Deduce Bases and Truth Tables for the Combinatorially Exploding Bit Manipulation Puzzles",
+          "published": "2026-06-22",
+          "link": "http://arxiv.org/abs/2606.23672v1",
+          "summary": "This paper presents our algorithmic innovations for the NVIDIA Nemotron Model Reasoning Challenge, focusing on Bit Manipulation Puzzles. In this task, the objective is to discover a hidden logical rule transforming input binary strings to outputs, then apply it to unseen inputs. Large Language Model"
+        }
+      ]
+    },
+    {
+      "query": "ReAct reasoning acting",
+      "results": [
+        {
+          "title": "Lift4D: Harmonizing Single-View 3D Estimation for 4D Reconstruction In-the-Wild",
+          "published": "2026-06-22",
+          "link": "http://arxiv.org/abs/2606.23688v1",
+          "summary": "Reconstructing dynamic non-rigid objects from monocular video requires integrating visual cues from direct observations with data-driven priors over geometry and appearance. Prior approaches either learn to directly predict 4D representations from visual input or initialize a 3D representation that "
+        },
+        {
+          "title": "Randomized YaRN Improves Length Generalization for Long-Context Reasoning",
+          "published": "2026-06-22",
+          "link": "http://arxiv.org/abs/2606.23687v1",
+          "summary": "Large language models (LLMs) are typically pretrained on short sequences and then extended to work on longer sequences with additional training. However, such LLMs still struggle to further generalize to very long sequences. We propose Randomized YaRN, a training method that improves length generali"
+        },
+        {
+          "title": "LIBERO-Safety: A Comprehensive Benchmark for Physical and Semantic Safety in Vision-Language-Action Models",
+          "published": "2026-06-22",
+          "link": "http://arxiv.org/abs/2606.23686v1",
+          "summary": "Despite the impressive manipulation capabilities of Vision-Language-Action (VLA) models, their operational safety under strict constraints remains largely unverified. To address this, we introduce a parametric safety benchmark to procedurally generate safety-critical scenarios with comprehensive sto"
+        },
+        {
+          "title": "LaST-HD: Learning Latent Physical Reasoning from Scalable Human Data for Robot Manipulation",
+          "published": "2026-06-22",
+          "link": "http://arxiv.org/abs/2606.23685v1",
+          "summary": "Human-hand demonstrations provide a direct and scalable source of physical interaction data for robot learning. While manual retargeting is indispensable for establishing kinematic action correspondence across different morphologies, robust transfer requires going beyond geometry to address the unde"
+        },
+        {
+          "title": "Emergent Andreev Reflection from a Lattice Duality Defect",
+          "published": "2026-06-22",
+          "link": "http://arxiv.org/abs/2606.23684v1",
+          "summary": "Andreev reflection converts an incoming fermion into an outgoing hole and is usually tied to a superconducting interface. We show that an analogous charge-conjugating boundary condition emerges from a purely lattice duality defect. Starting from a Majorana representation of the transverse-field Isin"
+        }
+      ]
+    }
+  ]
+}
