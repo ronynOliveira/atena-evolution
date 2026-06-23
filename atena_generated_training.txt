@@ -1,0 +1,56 @@
+
+============================================================
+[1] Tipo: analise
+Instrução: Analise o estilo literário dos contos do Senhor Robério, identificando: 1) Narrativa (pessoa gramati...
+
+Resposta:
+Os contos do Senhor Robério—numeado Robert Frost no contexto anglo-saxonista—possuem uma tapeçaria literária rica em complexidade formal, tecendo narrativas que transcendem o mero conto de histórias para mergulhar na psique humana com profundidade psicológica.
+
+
+1) **Narrativa (pessoa gramatical):** A narrativa dos contos do Robério é predominantemente da primeira pessoa, permitindo uma intimidade íntima e imediata. Esta escolha singular posiciona o leitor no coração das reflexões introspectivas...
+
+============================================================
+[2] Tipo: exercicio
+Instrução: Reescreva o seguinte trecho no estilo do Senhor Robério: 'A casa era velha e estava chovendo. Eu me ...
+
+Resposta:
+Uma morada antiga, vestida nas fracas vestes da chuva incessante - ela suspira com vozes esquecidas; um sussurro entre as gotas dançando em seus vidros lamentosos, tecendo lembranças fugazes do passado na tapeçaria do presente:—
+
+Ah! Quão pungente é o aroma do tempo marchando através dos corredores fracos da minha casa, como se cada passo fosse uma flor no campo de memórias - enredadas e confusas. O abraço gelado da chuva murmura sussurrando segredos nas paredes; eles falam, os velhos ladrões si...
+
+============================================================
+[3] Tipo: exercicio
+Instrução: Escreva um parágrafo descritivo de uma paisagem noturna (300 palavras) no estilo do Senhor Robério, ...
+
+Resposta:
+Sob o dossel das velhas árvores, as noites descem com a graça silenciosa dos sonhos fugazes; cada gota é um anedoto que ressoa na tela da noite—um tapete tejido de sonetos sem palavras, sussurrando os segredos do tempo em seu voo sereno. A lua—a caravel celestial—infiltra-se através das nublas como se pudesse penetrar o véu impenetrável da escuridão, lançando seus raios dourados na terra—um brilho fugaz que dança com as folhas encharnadas sob a cobertura de um veludo noturno, perfumado pelo amor...
+
+============================================================
+[4] Tipo: dialogo
+Instrução: Escreva um monólogo interior (400 palavras) de alguém que está em um jardim ao entardecer, refletind...
+
+Resposta:
+Em meio às flores, com suas cores desfeitas na luz fugaz da tarde,
+
+eu me encontro perdido no labirinto dos meus pensamentos; cada pétala desbotada, um fio delicado do tempo.
+
+O jardim, outrora vibrante de vida agora adormecido em tons terrosos—
+
+aquele refúgio onde eu encontrei conforto nos momentos mais sombrios?
+
+Ah, como as sombras começam a tecer seu labirinto na calçada encosta,
+
+um testamento silencioso da passagem implacável do tempo.
+
+A luz falha suavemente, deixando o mundo transitar p...
+
+============================================================
+[5] Tipo: dialogo
+Instrução: Escreva um monólogo interior (400 palavras) de alguém que encontra uma fotografia antiga e é invadid...
+
+Resposta:
+Encontrei-a - aquela foto tão velada na profundidade da minha despensa desértica; um pedaço do tempo congelado no papel, com tons de sepia que me fazem reminecer sobre o calor das minhas vidas passadas.
+
+Um momento se desenrola diante dos meus olhos, uma maré imundoa. O aroma pungente da tinta lavada e da encadernatura frágil ecoam em minúsculo—a lembrança do tempo marchando sem pausa, com as suas mãos incessantemente raspando a superfície de nossas existências efêmeras.
+
+O cheiro sedoso da pele...
