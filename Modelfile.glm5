@@ -1,0 +1,5 @@
+FROM phi4-mini:latest
+PARAMETER temperature 0.85
+PARAMETER top_p 0.92
+PARAMETER repeat_penalty 1.15
+PARAMETER num_ctx 8192
