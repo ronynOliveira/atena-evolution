@@ -63,6 +63,11 @@ class IdentityEngine:
         self.seguranca = seguranca or BlocoSeguranca()
         self.contexto = contexto or BlocoContexto()
 
+    def set_modo(self, modo: ModoOperacional):
+        """Define o modo operacional."""
+        if modo != self.modo:
+            self.modo = modo
+
     def detectar_modo(self, contexto: str) -> ModoOperacional:
         ctx = contexto.lower()
         if any(w in ctx for w in ["codigo", "python", "programar", "bug", "algoritmo", "funcao", "classe", "logica"]):
