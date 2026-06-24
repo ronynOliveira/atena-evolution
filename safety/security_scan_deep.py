@@ -23,12 +23,12 @@ import json
 import os
 import re
 import subprocess
-
-# Windows: CREATE_NO_WINDOW to prevent CMD flash
-WIN_FLAGS = subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+
+# Windows: CREATE_NO_WINDOW to prevent CMD flash
+WIN_FLAGS = subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0
 
 # ─── Paths ──────────────────────────────────────────────────────────────
 
