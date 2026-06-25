@@ -22,7 +22,7 @@ from pathlib import Path
 
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434")
 EMBED_MODEL = "nomic-embed-text:latest"
-CHAT_MODEL = "gemma4:e2b"
+CHAT_MODEL = "hermes3:8b"
 REQUEST_TIMEOUT = int(os.environ.get("OLLAMA_TIMEOUT", "180"))
 RAG_DB = os.path.join(os.path.dirname(__file__), "..", "rag_cache.db")
 
