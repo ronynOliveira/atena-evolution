@@ -217,7 +217,17 @@ atena_evolution/
 
 ---
 
-## 6. COMO USAR
+## 6. Wiki (Memória Expandida)
+
+A wiki está em `wiki/` (146+ páginas .md):
+- `_meta/` — Relatórios de sessão, análises, arquitetura
+- `entities/` — Agentes, ferramentas, projetos
+- `concepts/` — Ideias, filosofias, métodos
+- `literatura/` — Contos e análises do Senhor Robério
+
+---
+
+## 7. COMO USAR
 
 ### 6.1 Instalação
 ```bash
