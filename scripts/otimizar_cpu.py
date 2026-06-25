@@ -13,7 +13,7 @@ import subprocess, sys, os, json, time
 from pathlib import Path
 
 OLLAMA_URL = "http://localhost:11434"
-KEEP_MODELS = ["gemma4:e2b", "nomic-embed-text:latest"]
+KEEP_MODELS = ["hermes3:8b", "nomic-embed-text:latest"]
 REMOVE_OTHERS = True
 
 def get_models():
