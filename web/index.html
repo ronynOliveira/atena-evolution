@@ -1,1595 +1,4332 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Atena Evolução — AI Assistant</title>
-  <meta name="description" content="Atena Evolução — Interface de IA com chat, geração de imagens e muito mais.">
-  <meta name="theme-color" content="#0a0a1a">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATENA EVOLUAO - Interface Holografica</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="app.js"></script>
+    <style>
+        /* ============================================
+           VARIAVEIS CSS - Sistema de cores cyberpunk
+           ============================================ */
+        :root {
+            --cyan: #00f0ff;
+            --cyan-dim: #007a82;
+            --magenta: #ff00ff;
+            --magenta-dim: #8a008a;
+            --purple: #8b00ff;
+            --purple-dim: #4a0080;
+            --bg-dark: #0a0a0f;
+            --bg-panel: rgba(10, 10, 30, 0.75);
+            --bg-glass: rgba(0, 240, 255, 0.03);
+            --text-primary: #e0f7ff;
+            --text-secondary: #70a0b0;
+            --glow-cyan: 0 0 10px #00f0ff, 0 0 20px #00f0ff40, 0 0 40px #00f0ff20;
+            --glow-magenta: 0 0 10px #ff00ff, 0 0 20px #ff00ff40;
+            --glow-purple: 0 0 10px #8b00ff, 0 0 20px #8b00ff40;
+        }
 
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+        /* ============================================
+           RESET E BASE
+           ============================================ */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+        }
+        
+        /* ============================================
+           LOADING OVERLAY
+           ============================================ */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
 
-  <!-- Custom CSS -->
-  <link rel="stylesheet" href="style.css">
+        .loading-overlay.active {
+            display: flex;
+        }
 
-  <!-- Content Security Policy -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' http://localhost:11434 http://localhost:8000 http://localhost:8001 http://127.0.0.1:11434 http://127.0.0.1:8000 http://127.0.0.1:8001;">
+        .loading-content {
+            text-align: center;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(0, 240, 255, 0.2);
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        .loading-text {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--cyan);
+            font-size: 1rem;
+            letter-spacing: 2px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* ============================================
+           TYPING INDICATOR
+           ============================================ */
+        .typing-indicator {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-panel);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 20px;
+            padding: 8px 16px;
+            z-index: 100;
+        }
+
+        .typing-indicator.active {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--cyan);
+            border-radius: 50%;
+            animation: typingBounce 1.4s ease-in-out infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-8px); opacity: 1; }
+        }
+
+        /* ============================================
+           SELETOR CYBERPUNK
+           ============================================ */
+        .cyber-select {
+            width: 100%;
+            padding: 8px 12px;
+            background: var(--bg-glass);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .cyber-select:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
+        .cyber-select option {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+        }
+
+        .cyber-btn-small {
+            padding: 6px 12px;
+            background: rgba(255, 0, 255, 0.1);
+            border: 1px solid rgba(255, 0, 255, 0.3);
+            border-radius: 4px;
+            color: var(--magenta);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .cyber-btn-small:hover {
+            background: rgba(255, 0, 255, 0.2);
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+        }
+        :root {
+            --cyan: #00f0ff;
+            --cyan-dim: #007a82;
+            --magenta: #ff00ff;
+            --magenta-dim: #8a008a;
+            --purple: #8b00ff;
+            --purple-dim: #4a0080;
+            --bg-dark: #0a0a0f;
+            --bg-panel: rgba(10, 10, 30, 0.75);
+            --bg-glass: rgba(0, 240, 255, 0.03);
+            --text-primary: #e0f7ff;
+            --text-secondary: #70a0b0;
+            --glow-cyan: 0 0 10px #00f0ff, 0 0 20px #00f0ff40, 0 0 40px #00f0ff20;
+            --glow-magenta: 0 0 10px #ff00ff, 0 0 20px #ff00ff40;
+            --glow-purple: 0 0 10px #8b00ff, 0 0 20px #8b00ff40;
+        }
+
+        /* ============================================
+           LOADING OVERLAY
+           ============================================ */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(0, 240, 255, 0.2);
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        .loading-text {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--cyan);
+            font-size: 1rem;
+            letter-spacing: 2px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* ============================================
+           TYPING INDICATOR
+           ============================================ */
+        .typing-indicator {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-panel);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 20px;
+            padding: 8px 16px;
+            z-index: 100;
+        }
+
+        .typing-indicator.active {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--cyan);
+            border-radius: 50%;
+            animation: typingBounce 1.4s ease-in-out infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-8px); opacity: 1; }
+        }
+
+        /* ============================================
+           SELETOR CYBERPUNK
+           ============================================ */
+        .cyber-select {
+            width: 100%;
+            padding: 8px 12px;
+            background: var(--bg-glass);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .cyber-select:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
+        .cyber-select option {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+        }
+
+        .cyber-btn-small {
+            padding: 6px 12px;
+            background: rgba(255, 0, 255, 0.1);
+            border: 1px solid rgba(255, 0, 255, 0.3);
+            border-radius: 4px;
+            color: var(--magenta);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .cyber-btn-small:hover {
+            background: rgba(255, 0, 255, 0.2);
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+        }
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        /* ============================================
+           LOADING OVERLAY
+           ============================================ */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(0, 240, 255, 0.2);
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        .loading-text {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--cyan);
+            font-size: 1rem;
+            letter-spacing: 2px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* ============================================
+           TYPING INDICATOR
+           ============================================ */
+        .typing-indicator {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-panel);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 20px;
+            padding: 8px 16px;
+            z-index: 100;
+        }
+
+        .typing-indicator.active {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--cyan);
+            border-radius: 50%;
+            animation: typingBounce 1.4s ease-in-out infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-8px); opacity: 1; }
+        }
+
+        /* ============================================
+           SELETOR CYBERPUNK
+           ============================================ */
+        .cyber-select {
+            width: 100%;
+            padding: 8px 12px;
+            background: var(--bg-glass);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .cyber-select:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
+        .cyber-select option {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+        }
+
+        .cyber-btn-small {
+            padding: 6px 12px;
+            background: rgba(255, 0, 255, 0.1);
+            border: 1px solid rgba(255, 0, 255, 0.3);
+            border-radius: 4px;
+            color: var(--magenta);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .cyber-btn-small:hover {
+            background: rgba(255, 0, 255, 0.2);
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+        }
+        #three-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        /* ============================================
+           LOADING OVERLAY
+           ============================================ */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(0, 240, 255, 0.2);
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        .loading-text {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--cyan);
+            font-size: 1rem;
+            letter-spacing: 2px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* ============================================
+           TYPING INDICATOR
+           ============================================ */
+        .typing-indicator {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-panel);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 20px;
+            padding: 8px 16px;
+            z-index: 100;
+        }
+
+        .typing-indicator.active {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--cyan);
+            border-radius: 50%;
+            animation: typingBounce 1.4s ease-in-out infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-8px); opacity: 1; }
+        }
+
+        /* ============================================
+           SELETOR CYBERPUNK
+           ============================================ */
+        .cyber-select {
+            width: 100%;
+            padding: 8px 12px;
+            background: var(--bg-glass);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .cyber-select:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
+        .cyber-select option {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+        }
+
+        .cyber-btn-small {
+            padding: 6px 12px;
+            background: rgba(255, 0, 255, 0.1);
+            border: 1px solid rgba(255, 0, 255, 0.3);
+            border-radius: 4px;
+            color: var(--magenta);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .cyber-btn-small:hover {
+            background: rgba(255, 0, 255, 0.2);
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+        }
+        #tron-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        /* ============================================
+           LOADING OVERLAY
+           ============================================ */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(0, 240, 255, 0.2);
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        .loading-text {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--cyan);
+            font-size: 1rem;
+            letter-spacing: 2px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* ============================================
+           TYPING INDICATOR
+           ============================================ */
+        .typing-indicator {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-panel);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 20px;
+            padding: 8px 16px;
+            z-index: 100;
+        }
+
+        .typing-indicator.active {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--cyan);
+            border-radius: 50%;
+            animation: typingBounce 1.4s ease-in-out infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-8px); opacity: 1; }
+        }
+
+        /* ============================================
+           SELETOR CYBERPUNK
+           ============================================ */
+        .cyber-select {
+            width: 100%;
+            padding: 8px 12px;
+            background: var(--bg-glass);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .cyber-select:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
+        .cyber-select option {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+        }
+
+        .cyber-btn-small {
+            padding: 6px 12px;
+            background: rgba(255, 0, 255, 0.1);
+            border: 1px solid rgba(255, 0, 255, 0.3);
+            border-radius: 4px;
+            color: var(--magenta);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .cyber-btn-small:hover {
+            background: rgba(255, 0, 255, 0.2);
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+        }
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9998;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.03) 0px,
+                rgba(0, 0, 0, 0.03) 1px,
+                transparent 1px,
+                transparent 3px
+            );
+            mix-blend-mode: multiply;
+        }
+
+        /* Linhas de scan animadas (efeito de varredura) */
+        .scanline-moving {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            z-index: 9999;
+            pointer-events: none;
+            background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+            opacity: 0.15;
+            animation: scanMove 4s linear infinite;
+        }
+
+        @keyframes scanMove {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+
+        /* ============================================
+           LOADING OVERLAY
+           ============================================ */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(0, 240, 255, 0.2);
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        .loading-text {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--cyan);
+            font-size: 1rem;
+            letter-spacing: 2px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* ============================================
+           TYPING INDICATOR
+           ============================================ */
+        .typing-indicator {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-panel);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 20px;
+            padding: 8px 16px;
+            z-index: 100;
+        }
+
+        .typing-indicator.active {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--cyan);
+            border-radius: 50%;
+            animation: typingBounce 1.4s ease-in-out infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-8px); opacity: 1; }
+        }
+
+        /* ============================================
+           SELETOR CYBERPUNK
+           ============================================ */
+        .cyber-select {
+            width: 100%;
+            padding: 8px 12px;
+            background: var(--bg-glass);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .cyber-select:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
+        .cyber-select option {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+        }
+
+        .cyber-btn-small {
+            padding: 6px 12px;
+            background: rgba(255, 0, 255, 0.1);
+            border: 1px solid rgba(255, 0, 255, 0.3);
+            border-radius: 4px;
+            color: var(--magenta);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .cyber-btn-small:hover {
+            background: rgba(255, 0, 255, 0.2);
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+        }
+        .main-container {
+            position: relative;
+            z-index: 10;
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            grid-template-rows: 80px 1fr;
+            height: 100vh;
+            gap: 0;
+        }
+
+        /* ============================================
+           LOADING OVERLAY
+           ============================================ */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(0, 240, 255, 0.2);
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        .loading-text {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--cyan);
+            font-size: 1rem;
+            letter-spacing: 2px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* ============================================
+           TYPING INDICATOR
+           ============================================ */
+        .typing-indicator {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-panel);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 20px;
+            padding: 8px 16px;
+            z-index: 100;
+        }
+
+        .typing-indicator.active {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--cyan);
+            border-radius: 50%;
+            animation: typingBounce 1.4s ease-in-out infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-8px); opacity: 1; }
+        }
+
+        /* ============================================
+           SELETOR CYBERPUNK
+           ============================================ */
+        .cyber-select {
+            width: 100%;
+            padding: 8px 12px;
+            background: var(--bg-glass);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .cyber-select:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
+        .cyber-select option {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+        }
+
+        .cyber-btn-small {
+            padding: 6px 12px;
+            background: rgba(255, 0, 255, 0.1);
+            border: 1px solid rgba(255, 0, 255, 0.3);
+            border-radius: 4px;
+            color: var(--magenta);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .cyber-btn-small:hover {
+            background: rgba(255, 0, 255, 0.2);
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+        }
+        .header {
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            background: var(--bg-panel);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--cyan), var(--magenta), transparent);
+            opacity: 0.8;
+        }
+
+        /* Titulo ATENA EVOLUAO com efeito holografico */
+        .holo-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 900;
+            letter-spacing: 4px;
+            color: var(--cyan);
+            text-shadow: 
+                0 0 5px #fff,
+                0 0 10px var(--cyan),
+                0 0 20px var(--cyan),
+                0 0 40px var(--purple),
+                0 0 80px var(--purple);
+            animation: holoFlicker 3s infinite;
+            position: relative;
+        }
+
+        .holo-title::after {
+            content: 'ATENA EVOLUAO';
+            position: absolute;
+            left: 2px;
+            top: 1px;
+            color: var(--magenta);
+            opacity: 0.3;
+            mix-blend-mode: screen;
+            animation: glitchText 4s infinite;
+        }
+
+        @keyframes holoFlicker {
+            0%, 100% { opacity: 1; }
+            92% { opacity: 1; }
+            93% { opacity: 0.8; }
+            94% { opacity: 1; }
+            96% { opacity: 0.9; }
+            97% { opacity: 1; }
+        }
+
+        @keyframes glitchText {
+            0%, 100% { transform: translate(0); }
+            20% { transform: translate(-2px, 0); }
+            40% { transform: translate(2px, 0); }
+            60% { transform: translate(-1px, 1px); }
+            80% { transform: translate(1px, -1px); }
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .holo-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--cyan) 0%, var(--purple) 70%);
+            border: 2px solid var(--cyan);
+            box-shadow: var(--glow-cyan);
+            position: relative;
+            animation: avatarPulse 2s ease-in-out infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .holo-avatar::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 1px solid var(--cyan);
+            opacity: 0.5;
+            animation: ringRotate 3s linear infinite;
+        }
+
+        @keyframes avatarPulse {
+            0%, 100% { box-shadow: 0 0 10px var(--cyan), 0 0 20px var(--cyan); }
+            50% { box-shadow: 0 0 20px var(--cyan), 0 0 40px var(--magenta), 0 0 60px var(--purple); }
+        }
+
+        @keyframes ringRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* ============================================
+           LOADING OVERLAY
+           ============================================ */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(0, 240, 255, 0.2);
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        .loading-text {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--cyan);
+            font-size: 1rem;
+            letter-spacing: 2px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* ============================================
+           TYPING INDICATOR
+           ============================================ */
+        .typing-indicator {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-panel);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 20px;
+            padding: 8px 16px;
+            z-index: 100;
+        }
+
+        .typing-indicator.active {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--cyan);
+            border-radius: 50%;
+            animation: typingBounce 1.4s ease-in-out infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-8px); opacity: 1; }
+        }
+
+        /* ============================================
+           SELETOR CYBERPUNK
+           ============================================ */
+        .cyber-select {
+            width: 100%;
+            padding: 8px 12px;
+            background: var(--bg-glass);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .cyber-select:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
+        .cyber-select option {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+        }
+
+        .cyber-btn-small {
+            padding: 6px 12px;
+            background: rgba(255, 0, 255, 0.1);
+            border: 1px solid rgba(255, 0, 255, 0.3);
+            border-radius: 4px;
+            color: var(--magenta);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .cyber-btn-small:hover {
+            background: rgba(255, 0, 255, 0.2);
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+        }
+        .chat-section {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            scroll-behavior: smooth;
+        }
+
+        /* Scrollbar customizada */
+        .chat-messages::-webkit-scrollbar {
+            width: 4px;
+        }
+        .chat-messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: var(--cyan-dim);
+            border-radius: 2px;
+        }
+
+        /* ============================================
+           LOADING OVERLAY
+           ============================================ */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(0, 240, 255, 0.2);
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        .loading-text {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--cyan);
+            font-size: 1rem;
+            letter-spacing: 2px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* ============================================
+           TYPING INDICATOR
+           ============================================ */
+        .typing-indicator {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-panel);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 20px;
+            padding: 8px 16px;
+            z-index: 100;
+        }
+
+        .typing-indicator.active {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--cyan);
+            border-radius: 50%;
+            animation: typingBounce 1.4s ease-in-out infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-8px); opacity: 1; }
+        }
+
+        /* ============================================
+           SELETOR CYBERPUNK
+           ============================================ */
+        .cyber-select {
+            width: 100%;
+            padding: 8px 12px;
+            background: var(--bg-glass);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .cyber-select:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
+        .cyber-select option {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+        }
+
+        .cyber-btn-small {
+            padding: 6px 12px;
+            background: rgba(255, 0, 255, 0.1);
+            border: 1px solid rgba(255, 0, 255, 0.3);
+            border-radius: 4px;
+            color: var(--magenta);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .cyber-btn-small:hover {
+            background: rgba(255, 0, 255, 0.2);
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+        }
+        .chat-bubble {
+            max-width: 80%;
+            padding: 14px 20px;
+            border-radius: 16px;
+            backdrop-filter: blur(12px);
+            animation: bubbleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        @keyframes bubbleIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Balao da IA */
+        .chat-bubble.ai {
+            align-self: flex-start;
+            background: var(--bg-glass);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            box-shadow: 
+                0 0 15px rgba(0, 240, 255, 0.1),
+                inset 0 0 20px rgba(0, 240, 255, 0.05);
+            border-left: 3px solid var(--cyan);
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+        }
+
+        /* Balao do Usuario */
+        .chat-bubble.user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, rgba(255, 0, 255, 0.08), rgba(139, 0, 255, 0.08));
+            border: 1px solid rgba(255, 0, 255, 0.3);
+            box-shadow: 
+                0 0 15px rgba(255, 0, 255, 0.1),
+                inset 0 0 20px rgba(139, 0, 255, 0.05);
+            border-right: 3px solid var(--magenta);
+            clip-path: polygon(10px 0, 100% 0, 100% 100%, 0 100%, 0 10px);
+        }
+
+        .chat-bubble .sender-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.65rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            opacity: 0.7;
+        }
+
+        .chat-bubble.ai .sender-label {
+            color: var(--cyan);
+        }
+
+        .chat-bubble.user .sender-label {
+            color: var(--magenta);
+            text-align: right;
+        }
+
+        /* ============================================
+           LOADING OVERLAY
+           ============================================ */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(0, 240, 255, 0.2);
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        .loading-text {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--cyan);
+            font-size: 1rem;
+            letter-spacing: 2px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* ============================================
+           TYPING INDICATOR
+           ============================================ */
+        .typing-indicator {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-panel);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 20px;
+            padding: 8px 16px;
+            z-index: 100;
+        }
+
+        .typing-indicator.active {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--cyan);
+            border-radius: 50%;
+            animation: typingBounce 1.4s ease-in-out infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-8px); opacity: 1; }
+        }
+
+        /* ============================================
+           SELETOR CYBERPUNK
+           ============================================ */
+        .cyber-select {
+            width: 100%;
+            padding: 8px 12px;
+            background: var(--bg-glass);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .cyber-select:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
+        .cyber-select option {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+        }
+
+        .cyber-btn-small {
+            padding: 6px 12px;
+            background: rgba(255, 0, 255, 0.1);
+            border: 1px solid rgba(255, 0, 255, 0.3);
+            border-radius: 4px;
+            color: var(--magenta);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .cyber-btn-small:hover {
+            background: rgba(255, 0, 255, 0.2);
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+        }
+        .chat-input-container {
+            padding: 16px 24px;
+            background: var(--bg-panel);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(0, 240, 255, 0.15);
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            background: rgba(0, 240, 255, 0.03);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 12px;
+            padding: 12px 18px;
+            transition: all 0.3s ease;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: var(--cyan);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2), inset 0 0 15px rgba(0, 240, 255, 0.05);
+        }
+
+        .chat-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+        }
+
+        .chat-input::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.6;
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, var(--cyan), var(--purple));
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            color: #fff;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: var(--glow-cyan);
+        }
+
+        .send-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px var(--cyan), 0 0 40px var(--purple);
+        }
+
+        /* ============================================
+           LOADING OVERLAY
+           ============================================ */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(0, 240, 255, 0.2);
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        .loading-text {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--cyan);
+            font-size: 1rem;
+            letter-spacing: 2px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* ============================================
+           TYPING INDICATOR
+           ============================================ */
+        .typing-indicator {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-panel);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 20px;
+            padding: 8px 16px;
+            z-index: 100;
+        }
+
+        .typing-indicator.active {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--cyan);
+            border-radius: 50%;
+            animation: typingBounce 1.4s ease-in-out infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-8px); opacity: 1; }
+        }
+
+        /* ============================================
+           SELETOR CYBERPUNK
+           ============================================ */
+        .cyber-select {
+            width: 100%;
+            padding: 8px 12px;
+            background: var(--bg-glass);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .cyber-select:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
+        .cyber-select option {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+        }
+
+        .cyber-btn-small {
+            padding: 6px 12px;
+            background: rgba(255, 0, 255, 0.1);
+            border: 1px solid rgba(255, 0, 255, 0.3);
+            border-radius: 4px;
+            color: var(--magenta);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .cyber-btn-small:hover {
+            background: rgba(255, 0, 255, 0.2);
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+        }
+        .typing-indicator {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            padding: 8px 0;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--cyan);
+            animation: typingBounce 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: scale(0.6); opacity: 0.4; }
+            30% { transform: scale(1.2); opacity: 1; box-shadow: var(--glow-cyan); }
+        }
+
+        .neon-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1.2em;
+            background: var(--cyan);
+            margin-left: 2px;
+            vertical-align: text-bottom;
+            animation: cursorBlink 0.8s step-end infinite;
+            box-shadow: var(--glow-cyan);
+        }
+
+        @keyframes cursorBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* ============================================
+           LOADING OVERLAY
+           ============================================ */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(0, 240, 255, 0.2);
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        .loading-text {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--cyan);
+            font-size: 1rem;
+            letter-spacing: 2px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* ============================================
+           TYPING INDICATOR
+           ============================================ */
+        .typing-indicator {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-panel);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 20px;
+            padding: 8px 16px;
+            z-index: 100;
+        }
+
+        .typing-indicator.active {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--cyan);
+            border-radius: 50%;
+            animation: typingBounce 1.4s ease-in-out infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-8px); opacity: 1; }
+        }
+
+        /* ============================================
+           SELETOR CYBERPUNK
+           ============================================ */
+        .cyber-select {
+            width: 100%;
+            padding: 8px 12px;
+            background: var(--bg-glass);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .cyber-select:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
+        .cyber-select option {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+        }
+
+        .cyber-btn-small {
+            padding: 6px 12px;
+            background: rgba(255, 0, 255, 0.1);
+            border: 1px solid rgba(255, 0, 255, 0.3);
+            border-radius: 4px;
+            color: var(--magenta);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .cyber-btn-small:hover {
+            background: rgba(255, 0, 255, 0.2);
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+        }
+        .sidebar {
+            background: var(--bg-panel);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(0, 240, 255, 0.15);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        /* Card de status do sistema */
+        .status-panel {
+            background: var(--bg-glass);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            backdrop-filter: blur(8px);
+        }
+
+        .panel-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            color: var(--cyan);
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-title::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--cyan);
+            border-radius: 50%;
+            box-shadow: var(--glow-cyan);
+        }
+
+        /* Status items */
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0, 240, 255, 0.08);
+        }
+
+        .status-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            letter-spacing: 1px;
+        }
+
+        .status-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem;
+            color: var(--cyan);
+            text-shadow: 0 0 8px var(--cyan);
+        }
+
+        /* Barra de progresso neon */
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(0, 240, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 6px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--cyan), var(--magenta));
+            border-radius: 2px;
+            box-shadow: 0 0 8px var(--cyan);
+            transition: width 1s ease;
+        }
+
+        /* D3 Chart Container */
+        #d3-chart {
+            width: 100%;
+            height: 160px;
+        }
+
+        /* ============================================
+           LOADING OVERLAY
+           ============================================ */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(0, 240, 255, 0.2);
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        .loading-text {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--cyan);
+            font-size: 1rem;
+            letter-spacing: 2px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* ============================================
+           TYPING INDICATOR
+           ============================================ */
+        .typing-indicator {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-panel);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 20px;
+            padding: 8px 16px;
+            z-index: 100;
+        }
+
+        .typing-indicator.active {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--cyan);
+            border-radius: 50%;
+            animation: typingBounce 1.4s ease-in-out infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-8px); opacity: 1; }
+        }
+
+        /* ============================================
+           SELETOR CYBERPUNK
+           ============================================ */
+        .cyber-select {
+            width: 100%;
+            padding: 8px 12px;
+            background: var(--bg-glass);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .cyber-select:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
+        .cyber-select option {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+        }
+
+        .cyber-btn-small {
+            padding: 6px 12px;
+            background: rgba(255, 0, 255, 0.1);
+            border: 1px solid rgba(255, 0, 255, 0.3);
+            border-radius: 4px;
+            color: var(--magenta);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .cyber-btn-small:hover {
+            background: rgba(255, 0, 255, 0.2);
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+        }
+        .particles-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            animation: particleFloat linear infinite;
+            opacity: 0.6;
+        }
+
+        @keyframes particleFloat {
+            0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { transform: translateY(-10px) translateX(30px); opacity: 0; }
+        }
+
+        /* ============================================
+           LOADING OVERLAY
+           ============================================ */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(0, 240, 255, 0.2);
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        .loading-text {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--cyan);
+            font-size: 1rem;
+            letter-spacing: 2px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* ============================================
+           TYPING INDICATOR
+           ============================================ */
+        .typing-indicator {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-panel);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 20px;
+            padding: 8px 16px;
+            z-index: 100;
+        }
+
+        .typing-indicator.active {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--cyan);
+            border-radius: 50%;
+            animation: typingBounce 1.4s ease-in-out infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-8px); opacity: 1; }
+        }
+
+        /* ============================================
+           SELETOR CYBERPUNK
+           ============================================ */
+        .cyber-select {
+            width: 100%;
+            padding: 8px 12px;
+            background: var(--bg-glass);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .cyber-select:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
+        .cyber-select option {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+        }
+
+        .cyber-btn-small {
+            padding: 6px 12px;
+            background: rgba(255, 0, 255, 0.1);
+            border: 1px solid rgba(255, 0, 255, 0.3);
+            border-radius: 4px;
+            color: var(--magenta);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .cyber-btn-small:hover {
+            background: rgba(255, 0, 255, 0.2);
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+        }
+        .welcome-msg {
+            text-align: center;
+            padding: 40px 20px;
+            opacity: 0.8;
+        }
+
+        .welcome-msg h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            color: var(--cyan);
+            text-shadow: var(--glow-cyan);
+            margin-bottom: 12px;
+            letter-spacing: 2px;
+        }
+
+        .welcome-msg p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.8;
+        }
+
+        /* ============================================
+           LOADING OVERLAY
+           ============================================ */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(0, 240, 255, 0.2);
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        .loading-text {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--cyan);
+            font-size: 1rem;
+            letter-spacing: 2px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* ============================================
+           TYPING INDICATOR
+           ============================================ */
+        .typing-indicator {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-panel);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 20px;
+            padding: 8px 16px;
+            z-index: 100;
+        }
+
+        .typing-indicator.active {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--cyan);
+            border-radius: 50%;
+            animation: typingBounce 1.4s ease-in-out infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-8px); opacity: 1; }
+        }
+
+        /* ============================================
+           SELETOR CYBERPUNK
+           ============================================ */
+        .cyber-select {
+            width: 100%;
+            padding: 8px 12px;
+            background: var(--bg-glass);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .cyber-select:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
+        .cyber-select option {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+        }
+
+        .cyber-btn-small {
+            padding: 6px 12px;
+            background: rgba(255, 0, 255, 0.1);
+            border: 1px solid rgba(255, 0, 255, 0.3);
+            border-radius: 4px;
+            color: var(--magenta);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .cyber-btn-small:hover {
+            background: rgba(255, 0, 255, 0.2);
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+        }
+        @media (max-width: 900px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                grid-template-row: 70px 1fr 280px;
+            }
+            .sidebar {
+                border-left: none;
+                border-top: 1px solid rgba(0, 240, 255, 0.2);
+            }
+            .holo-title {
+                font-size: 1.1rem;
+                letter-spacing: 2px;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .chat-bubble {
+                max-width: 92%;
+                padding: 10px 14px;
+            }
+            .header {
+                padding: 0 12px;
+            }
+            .chat-messages {
+                padding: 16px 12px;
+            }
+        }
+    </style>
 </head>
 <body>
+    <!-- Background Three.js (particulas 3D) -->
+    <canvas id="three-background"></canvas>
 
-  <!-- Background Effects -->
-  <div class="bg-effects">
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-    <div class="orb orb-3"></div>
-  </div>
+    <!-- Grid Tron animado -->
+    <canvas id="tron-grid"></canvas>
 
-  <!-- Toast Container -->
-  <div class="toast-container" id="toastContainer"></div>
+    <!-- Scanlines CRT -->
+    <div class="scanlines"></div>
+    <div class="scanline-moving"></div>
 
-  <!-- App Container -->
-  <div class="app-container">
+    /* ============================================
+       LOADING OVERLAY
+       ============================================ */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(10, 10, 15, 0.85);
+        backdrop-filter: blur(10px);
+        z-index: 10000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+    }
 
-    <!-- Sidebar Overlay (mobile) -->
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    .loading-overlay.active {
+        display: flex;
+    }
 
-    <!-- ═══════════════════════════════════════
-         SIDEBAR
-    ═══════════════════════════════════════ -->
-    <aside class="sidebar" id="sidebar">
-      <!-- Sidebar Header -->
-      <div class="sidebar-header">
-        <div class="sidebar-logo">A</div>
-        <div class="sidebar-brand">
-          <h2>Atena Evolução</h2>
-          <span>AI Assistant</span>
-        </div>
-      </div>
+    .loading-content {
+        text-align: center;
+    }
 
-      <!-- Sidebar Navigation -->
-      <nav class="sidebar-nav">
-        <button class="sidebar-nav-btn active" data-panel="status" title="Status">
-          <i class="fas fa-signal"></i>
-          <span>Status</span>
-        </button>
-        <button class="sidebar-nav-btn" data-panel="settings" title="Configurações">
-          <i class="fas fa-cog"></i>
-          <span>Config</span>
-        </button>
-        <button class="sidebar-nav-btn" data-panel="history" title="Histórico">
-          <i class="fas fa-history"></i>
-          <span>Histórico</span>
-        </button>
-      </nav>
+    .loading-spinner {
+        width: 60px;
+        height: 60px;
+        border: 3px solid rgba(0, 240, 255, 0.2);
+        border-top-color: var(--cyan);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 16px;
+    }
 
-      <!-- Sidebar Content -->
-      <div class="sidebar-content">
+    .loading-text {
+        font-family: 'Orbitron', sans-serif;
+        color: var(--cyan);
+        font-size: 1rem;
+        letter-spacing: 2px;
+        animation: pulse 1.5s ease-in-out infinite;
+    }
 
-        <!-- Status Panel -->
-        <div class="sidebar-section active" id="panel-status">
-          <!-- Ollama Status -->
-          <div class="status-card">
-            <h3><i class="fas fa-server"></i> Ollama</h3>
-            <div class="status-indicator">
-              <div class="status-dot" id="ollamaStatusDot"></div>
-              <span id="ollamaStatusText">Verificando...</span>
-              <small id="ollamaVersion"></small>
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    /* ============================================
+       TYPING INDICATOR
+       ============================================ */
+    .typing-indicator {
+        display: none;
+        position: fixed;
+        bottom: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--bg-panel);
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        border-radius: 20px;
+        padding: 8px 16px;
+        z-index: 100;
+    }
+
+    .typing-indicator.active {
+        display: flex;
+        gap: 4px;
+    }
+
+    .typing-dot {
+        width: 8px;
+        height: 8px;
+        background: var(--cyan);
+        border-radius: 50%;
+        animation: typingBounce 1.4s ease-in-out infinite;
+    }
+
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typingBounce {
+        0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+        30% { transform: translateY(-8px); opacity: 1; }
+    }
+
+    /* ============================================
+       SELETOR CYBERPUNK
+       ============================================ */
+    .cyber-select {
+        width: 100%;
+        padding: 8px 12px;
+        background: var(--bg-glass);
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        border-radius: 4px;
+        color: var(--text-primary);
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.9rem;
+        cursor: pointer;
+        outline: none;
+        transition: all 0.3s;
+    }
+
+    .cyber-select:focus {
+        border-color: var(--cyan);
+        box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    }
+
+    .cyber-select option {
+        background: var(--bg-dark);
+        color: var(--text-primary);
+    }
+
+    .cyber-btn-small {
+        padding: 6px 12px;
+        background: rgba(255, 0, 255, 0.1);
+        border: 1px solid rgba(255, 0, 255, 0.3);
+        border-radius: 4px;
+        color: var(--magenta);
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .cyber-btn-small:hover {
+        background: rgba(255, 0, 255, 0.2);
+        box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+    }
+    <div class="main-container">
+        
+        <!-- HEADER -->
+        <header class="header">
+            <h1 class="holo-title">ATENA EVOLUAO</h1>
+            <div class="header-right">
+                <div class="holo-avatar">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M12 2v4m0 12v4m10-10h-4M6 12H2m15.07-7.07l-2.83 2.83M9.76 14.24l-2.83 2.83m12.02 0l-2.83-2.83M9.76 9.76L6.93 6.93"/>
+                    </svg>
+                </div>
             </div>
-            <div class="status-indicator">
-              <div class="status-dot" id="apiStatusDot"></div>
-              <span id="apiStatusText">API Local</span>
-              <small id="apiLatency"></small>
-            </div>
-          </div>
+        </header>
 
-          <!-- Model Selection -->
-          <div class="status-card">
-            <h3><i class="fas fa-brain"></i> Modelo</h3>
-            <div class="form-group">
-              <label for="modelSelect"><i class="fas fa-robot"></i> Modelo Selecionado</label>
-              <select class="form-select" id="modelSelect">
-                <option value="">Carregando modelos...</option>
-              </select>
-            </div>
-            <button class="btn btn-secondary btn-sm btn-block" id="refreshModelsBtn" style="margin-top: 8px;">
-              <i class="fas fa-sync-alt"></i> Atualizar Modelos
-            </button>
-          </div>
-
-          <!-- Parameters -->
-          <div class="status-card">
-            <h3><i class="fas fa-sliders-h"></i> Parâmetros</h3>
-            <div class="form-group">
-              <label for="temperatureSlider">Temperatura</label>
-              <div class="range-container">
-                <input type="range" class="range-slider" id="temperatureSlider" min="0" max="2" step="0.1" value="0.7">
-                <span class="range-value" id="temperatureValue">0.7</span>
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="maxTokensSlider">Max Tokens</label>
-              <div class="range-container">
-                <input type="range" class="range-slider" id="maxTokensSlider" min="256" max="8192" step="256" value="2048">
-                <span class="range-value" id="maxTokensValue">2048</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Settings Panel -->
-        <div class="sidebar-section" id="panel-settings">
-          <div class="status-card" style="border: none; padding: 0; background: transparent;">
-            <h3><i class="fas fa-key"></i> Chaves de API</h3>
-
-            <div class="form-group">
-              <label for="ollamaUrl">Ollama URL</label>
-              <input type="text" class="form-input" id="ollamaUrl" value="http://localhost:11434" placeholder="http://localhost:11434">
+        <!-- SECAO DE CHAT -->
+        <main class="chat-section">
+            <div class="chat-messages" id="chat-messages">
+                <!-- Mensagem de boas-vindas -->
+                <div class="welcome-msg">
+                    <h2>SISTEMA ATIVO</h2>
+                    <p>Atena Evolucao inicializada.<br>Interface holografica sincronizada.<br>Como posso ajudar?</p>
+                </div>
             </div>
 
-            <div class="form-group">
-              <label for="apiLocalUrl">API Local URL</label>
-              <input type="text" class="form-input" id="apiLocalUrl" value="http://localhost:8000" placeholder="http://localhost:8000">
-            </div>
-
-            <div class="form-group">
-              <label for="geminiKey">Gemini API Key</label>
-              <div class="api-key-input">
-                <input type="password" class="form-input" id="geminiKey" placeholder="AIza...">
-                <button class="api-key-toggle" data-target="geminiKey" type="button" title="Visualizar/Ocultar chave">
-                  <i class="fas fa-eye"></i>
-                </button>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="openaiKey">OpenAI API Key</label>
-              <div class="api-key-input">
-                <input type="password" class="form-input" id="openaiKey" placeholder="sk-...">
-                <button class="api-key-toggle" data-target="openaiKey" type="button" title="Visualizar/Ocultar chave">
-                  <i class="fas fa-eye"></i>
-                </button>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="anthropicKey">Anthropic API Key</label>
-              <div class="api-key-input">
-                <input type="password" class="form-input" id="anthropicKey" placeholder="sk-ant-...">
-                <button class="api-key-toggle" data-target="anthropicKey" type="button" title="Visualizar/Ocultar chave">
-                  <i class="fas fa-eye"></i>
-                </button>
-              </div>
-            </div>
-
-            <div style="display: flex; gap: 8px; margin-top: 16px;">
-              <button class="btn btn-primary btn-sm" id="saveApiKeysBtn" style="flex: 1;">
-                <i class="fas fa-save"></i> Salvar
-              </button>
-              <button class="btn btn-secondary btn-sm" id="testConnectionsBtn" style="flex: 1;">
-                <i class="fas fa-plug"></i> Testar
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- History Panel -->
-        <div class="sidebar-section" id="panel-history">
-          <div class="status-card" style="border: none; padding: 0; background: transparent;">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-              <h3 style="margin-bottom: 0;"><i class="fas fa-comments"></i> Conversas</h3>
-              <button class="btn btn-ghost btn-sm" id="clearHistoryBtn" title="Limpar histórico">
-                <i class="fas fa-trash-alt"></i>
-              </button>
-            </div>
-            <div class="history-list" id="historyList">
-              <div class="history-empty">
-                <i class="fas fa-inbox"></i>
-                <span>Nenhuma conversa ainda</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </aside>
-
-    <!-- ═══════════════════════════════════════
-         MAIN CONTENT
-    ═══════════════════════════════════════ -->
-    <main class="main-content">
-
-      <!-- Header -->
-      <header class="main-header">
-        <div class="header-left">
-          <button class="sidebar-toggle" id="sidebarToggle" aria-label="Alternar menu lateral">
-            <i class="fas fa-bars"></i>
-          </button>
-          <div class="header-title">
-            <h1>Atena Evolução</h1>
-            <span>Assistente IA Inteligente</span>
-          </div>
-        </div>
-        <div class="header-right">
-          <button class="header-btn" id="newChatBtn" data-tooltip="Nova Conversa">
-            <i class="fas fa-plus"></i>
-          </button>
-          <button class="header-btn" id="exportChatBtn" data-tooltip="Exportar Chat">
-            <i class="fas fa-download"></i>
-          </button>
-          <button class="header-btn" id="themeBtn" data-tooltip="Alternar Tema">
-            <i class="fas fa-moon"></i>
-          </button>
-        </div>
-      </header>
-
-      <!-- Tab Navigation -->
-      <nav class="tab-nav">
-        <button class="tab-btn active" data-tab="chat">
-          <i class="fas fa-comments"></i>
-          <span>Chat</span>
-        </button>
-        <button class="tab-btn" data-tab="images">
-          <i class="fas fa-image"></i>
-          <span>Imagens</span>
-        </button>
-        <button class="tab-btn" data-tab="config">
-          <i class="fas fa-cogs"></i>
-          <span>Configurações</span>
-        </button>
-      </nav>
-
-      <!-- Tab Content -->
-      <div class="tab-content">
-
-        <!-- ── CHAT TAB ── -->
-        <div class="tab-pane active" id="tab-chat">
-          <!-- Messages Area -->
-          <div class="chat-messages" id="chatMessages">
-            <!-- Welcome Message -->
-            <div class="welcome-message" id="welcomeMessage">
-              <div class="welcome-icon">
-                <i class="fas fa-robot"></i>
-              </div>
-              <h2>Olá! Eu sou a Atena ✨</h2>
-              <p>Sua assistente de IA inteligente. Como posso ajudar você hoje?</p>
-              <div class="quick-prompts">
-                <button class="quick-prompt-btn" data-prompt="Explique-me a teoria da relatividade de forma simples">
-                  <i class="fas fa-atom"></i>
-                  <span>Explique a relatividade</span>
-                </button>
-                <button class="quick-prompt-btn" data-prompt="Me ajude a escrever um e-mail profissional">
-                  <i class="fas fa-envelope"></i>
-                  <span>Escrever e-mail</span>
-                </button>
-                <button class="quick-prompt-btn" data-prompt="Quais as últimas tendências em IA?">
-                  <i class="fas fa-chart-line"></i>
-                  <span>Tendências em IA</span>
-                </button>
-                <button class="quick-prompt-btn" data-prompt="Me ajude a programar em Python">
-                  <i class="fas fa-code"></i>
-                  <span>Programar em Python</span>
-                </button>
-                <button class="quick-prompt-btn" data-prompt="Crie uma receita com frango e batata">
-                  <i class="fas fa-utensils"></i>
-                  <span>Criar receita</span>
-                </button>
-                <button class="quick-prompt-btn" data-prompt="Me conte uma curiosidade interessante">
-                  <i class="fas fa-lightbulb"></i>
-                  <span>Curiosidade</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Chat Input -->
-          <div class="chat-input-area">
+            <!-- Input de mensagem -->
             <div class="chat-input-container">
-              <div class="chat-input-wrapper">
-                <textarea
-                  id="chatInput"
-                  placeholder="Digite sua mensagem... (Shift+Enter para nova linha)"
-                  rows="1"
-                ></textarea>
-                <div class="chat-input-actions">
-                  <button class="chat-input-action" id="attachBtn" data-tooltip="Anexar arquivo">
-                    <i class="fas fa-paperclip"></i>
-                  </button>
-                  <button class="chat-input-action" id="micBtn" data-tooltip="Entrada por voz">
-                    <i class="fas fa-microphone"></i>
-                  </button>
+                <div class="input-wrapper">
+                    <input 
+                        type="text" 
+                        class="chat-input" 
+                        id="user-input" 
+                        placeholder="Digite sua mensagem..." 
+                        autocomplete="off"
+                    >
+                    <button class="send-btn" id="send-btn" aria-label="Enviar">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="22" y1="2" x2="11" y2="13"/>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                        </svg>
+                    </button>
                 </div>
-              </div>
-              <button class="send-btn" id="sendBtn" data-tooltip="Enviar (Enter)">
-                <i class="fas fa-paper-plane"></i>
-              </button>
             </div>
-          </div>
+        </main>
+
+        <!-- Loading Overlay -->
+        <div class="loading-overlay" id="loading-overlay">
+            <div class="loading-content">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Processando...</div>
+            </div>
         </div>
 
-        <!-- ── IMAGES TAB ── -->
-        <div class="tab-pane" id="tab-images">
-          <div class="image-gen-container">
-            <div class="image-gen-panel">
-              <!-- Image Generation Form -->
-              <div class="image-gen-form">
-                <h3><i class="fas fa-magic"></i> Gerar Imagem</h3>
-                <textarea
-                  class="image-prompt-input"
-                  id="imagePromptInput"
-                  placeholder="Descreva a imagem que deseja gerar... Ex: Um gato astronauta flutuando no espaço com nebulosas coloridas ao fundo"
-                ></textarea>
-
-                <div class="form-group" style="margin-bottom: 16px;">
-                  <label>Estilo</label>
-                  <div class="style-buttons">
-                    <button class="style-btn active" data-style="realista">
-                      <i class="fas fa-camera"></i> Realista
-                    </button>
-                    <button class="style-btn" data-style="artistico">
-                      <i class="fas fa-palette"></i> Artístico
-                    </button>
-                    <button class="style-btn" data-style="cartoon">
-                      <i class="fas fa-spray-can"></i> Cartoon
-                    </button>
-                    <button class="style-btn" data-style="anime">
-                      <i class="fas fa-star"></i> Anime
-                    </button>
-                    <button class="style-btn" data-style="3d">
-                      <i class="fas fa-cube"></i> 3D Render
-                    </button>
-                    <button class="style-btn" data-style="pixel">
-                      <i class="fas fa-th"></i> Pixel Art
-                    </button>
-                    <button class="style-btn" data-style="oil">
-                      <i class="fas fa-brush"></i> Pintura Óleo
-                    </button>
-                    <button class="style-btn" data-style="watercolor">
-                      <i class="fas fa-tint"></i> Aquarela
-                    </button>
-                  </div>
-                </div>
-
-                <div style="display: flex; gap: 8px;">
-                  <button class="btn btn-primary" id="generateImageBtn" style="flex: 1;">
-                    <i class="fas fa-wand-magic-sparkles"></i> Gerar Imagem
-                  </button>
-                  <button class="btn btn-secondary" id="clearImagePromptBtn" title="Limpar prompt">
-                    <i class="fas fa-eraser"></i>
-                  </button>
-                </div>
-              </div>
-
-              <!-- Image Gallery -->
-              <div class="image-gallery" id="imageGallery">
-                <div class="gallery-empty" id="galleryEmpty">
-                  <i class="fas fa-images"></i>
-                  <p>Nenhuma imagem gerada ainda.<br>Descreva o que deseja e clique em Gerar!</p>
-                </div>
-              </div>
-            </div>
-          </div>
+        <!-- Typing Indicator -->
+        <div class="typing-indicator" id="typing-indicator">
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
         </div>
 
-        <!-- ── CONFIG TAB ── -->
-        <div class="tab-pane" id="tab-config">
-          <div class="settings-container">
-            <div class="settings-panel">
-              <!-- General Settings -->
-              <div class="settings-section">
-                <h3><i class="fas fa-sliders-h"></i> Configurações Gerais</h3>
-
-                <div class="form-group">
-                  <label for="configOllamaUrl">Ollama URL</label>
-                  <input type="text" class="form-input" id="configOllamaUrl" value="http://localhost:11434">
+        <!-- SIDEBAR - Status e Visualizacoes -->
+        <aside class="sidebar">
+            <!-- Painel de Status do Sistema -->
+            <div class="status-panel">
+                <div class="panel-title">Status do Sistema</div>
+                
+                <div class="status-item">
+                    <span class="status-label">Modelo</span>
+                    <span class="status-value" id="model-name">Atena-V7</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">RAM</span>
+                    <span class="status-value" id="ram-usage">67%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 67%"></div>
                 </div>
 
-                <div class="form-group">
-                  <label for="configApiUrl">API Local URL</label>
-                  <input type="text" class="form-input" id="configApiUrl" value="http://localhost:8000">
+                <div class="status-item" style="margin-top: 12px;">
+                    <span class="status-label">Tokens/s</span>
+                    <span class="status-value" id="token-count">142</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 35%"></div>
                 </div>
 
-                <div class="form-group">
-                  <label for="configModel">Modelo Padrão</label>
-                  <select class="form-select" id="configModel">
-                    <option value="">Carregando...</option>
-                  </select>
+                <div class="status-item" style="margin-top: 12px;">
+                    <span class="status-label">Velocidade</span>
+                    <span class="status-value" id="response-time">12ms</span>
                 </div>
 
-                <div class="form-group">
-                  <label for="configTemperature">Temperatura Padrão</label>
-                  <div class="range-container">
-                    <input type="range" class="range-slider" id="configTemperature" min="0" max="2" step="0.1" value="0.7">
-                    <span class="range-value" id="configTempValue">0.7</span>
-                  </div>
+                <div class="status-item" style="margin-top: 12px;">
+                    <span class="status-label">Status</span>
+                    <span class="status-value" id="status-indicator" style="color: #00ff88; text-shadow: 0 0 8px #00ff88;">ONLINE</span>
+                    <span id="status-text" style="display:none">Conectado</span>
                 </div>
-
-                <div class="form-group">
-                  <label for="configMaxTokens">Max Tokens Padrão</label>
-                  <div class="range-container">
-                    <input type="range" class="range-slider" id="configMaxTokens" min="256" max="8192" step="256" value="2048">
-                    <span class="range-value" id="configTokensValue">2048</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- API Keys -->
-              <div class="settings-section">
-                <h3><i class="fas fa-key"></i> Chaves de API</h3>
-
-                <div class="form-group">
-                  <label for="configGeminiKey">Google Gemini API Key</label>
-                  <div class="api-key-input">
-                    <input type="password" class="form-input" id="configGeminiKey" placeholder="AIza...">
-                    <button class="api-key-toggle" data-target="configGeminiKey" type="button" title="Visualizar/Ocultar chave">
-                      <i class="fas fa-eye"></i>
-                    </button>
-                  </div>
-                </div>
-
-                <div class="form-group">
-                  <label for="configOpenaiKey">OpenAI API Key</label>
-                  <div class="api-key-input">
-                    <input type="password" class="form-input" id="configOpenaiKey" placeholder="sk-...">
-                    <button class="api-key-toggle" data-target="configOpenaiKey" type="button" title="Visualizar/Ocultar chave">
-                      <i class="fas fa-eye"></i>
-                    </button>
-                  </div>
-                </div>
-
-                <div class="form-group">
-                  <label for="configAnthropicKey">Anthropic API Key</label>
-                  <div class="api-key-input">
-                    <input type="password" class="form-input" id="configAnthropicKey" placeholder="sk-ant-...">
-                    <button class="api-key-toggle" data-target="configAnthropicKey" type="button" title="Visualizar/Ocultar chave">
-                      <i class="fas fa-eye"></i>
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <!-- About -->
-              <div class="settings-section">
-                <h3><i class="fas fa-info-circle"></i> Sobre</h3>
-                <p style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.7;">
-                  <strong style="color: var(--text-primary);">Atena Evolução</strong> é uma interface web moderna para interação com modelos de IA.
-                  Compatível com Ollama, OpenAI, Google Gemini e Anthropic Claude.
-                </p>
-                <div style="margin-top: 16px; display: flex; gap: 16px; flex-wrap: wrap;">
-                  <span class="connection-badge connected">
-                    <i class="fas fa-check-circle"></i> v1.0.0
-                  </span>
-                  <span class="connection-badge" style="background: rgba(59, 130, 246, 0.15); color: var(--accent-blue);">
-                    <i class="fas fa-code"></i> Hermes Agent
-                  </span>
-                </div>
-              </div>
-
-              <!-- Actions -->
-              <div class="settings-actions">
-                <button class="btn btn-secondary" id="resetSettingsBtn">
-                  <i class="fas fa-undo"></i> Restaurar Padrões
-                </button>
-                <button class="btn btn-primary" id="saveAllSettingsBtn">
-                  <i class="fas fa-save"></i> Salvar Configurações
-                </button>
-              </div>
             </div>
-          </div>
-        </div>
 
-      </div>
-    </main>
-  </div>
+            <!-- Configuracao - Seletor de Modelo -->
+            <div class="status-panel">
+                <div class="panel-title">Modelo de IA</div>
+                <select id="model-select" class="cyber-select">
+                    <option value="hermes3:8b">Hermes 8B (Balanceado)</option>
+                    <option value="phi4-mini:latest">Phi4 Mini (Rapido)</option>
+                    <option value="gemma4:e2b">Gemma4 E2B (Leve)</option>
+                </select>
+            </div>
 
-  <!-- Image Preview Modal -->
-  <div class="modal-overlay image-preview-modal" id="imagePreviewModal">
-    <div class="modal">
-      <div class="modal-header">
-        <h3 id="previewModalTitle">Visualizar Imagem</h3>
-        <button class="modal-close" id="closePreviewModal" aria-label="Fechar visualização">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-      <div class="modal-body">
-        <img id="previewImage" src="" alt="Preview">
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" id="closePreviewBtn">
-          <i class="fas fa-times"></i> Fechar
-        </button>
-        <button class="btn btn-primary" id="downloadPreviewBtn">
-          <i class="fas fa-download"></i> Download
-        </button>
-      </div>
+            <!-- Grafico D3.js - Performance -->
+            <div class="status-panel">
+                <div class="panel-title">Performance</div>
+                <div id="performance-chart"></div>
+            </div>
+
+            <!-- Footer info -->
+            <div class="status-panel" style="padding: 12px;">
+                <div class="panel-title">Sistema</div>
+                <div class="status-item">
+                    <span class="status-label">Versao</span>
+                    <span class="status-value" id="version-info">v2.0.0</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Custo</span>
+                    <span class="status-value" id="cost-info" style="color: #00ff88;">R$ 0,00</span>
+                </div>
+                <button id="clear-btn" class="cyber-btn-small" style="width:100%;margin-top:8px;">Limpar Chat</button>
+            </div>
     </div>
-  </div>
 
-  <!-- Confirm Modal -->
-  <div class="modal-overlay" id="confirmModal">
-    <div class="modal">
-      <h3 id="confirmModalTitle">Confirmar</h3>
-      <p id="confirmModalText">Tem certeza que deseja continuar?</p>
-      <div class="modal-actions">
-        <button class="btn btn-secondary" id="confirmModalCancel">Cancelar</button>
-        <button class="btn btn-primary" id="confirmModalOk">Confirmar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════════════════
-       JAVASCRIPT
-  ═══════════════════════════════════════ -->
-  <script>
-  (function() {
-    'use strict';
-
-    // ── State Management ──
-    const state = {
-      ollamaUrl: localStorage.getItem('atena_ollamaUrl') || 'http://localhost:11434',
-      apiUrl: localStorage.getItem('atena_apiUrl') || 'http://localhost:8000',
-      model: localStorage.getItem('atena_model') || '',
-      temperature: parseFloat(localStorage.getItem('atena_temperature') || '0.7'),
-      maxTokens: parseInt(localStorage.getItem('atena_maxTokens') || '2048'),
-      messages: [],
-      conversations: JSON.parse(localStorage.getItem('atena_conversations') || '[]'),
-      currentConversationId: null,
-      images: JSON.parse(localStorage.getItem('atena_images') || '[]'),
-      selectedStyle: 'realista',
-      isStreaming: false,
-      ollamaOnline: false,
-      apiOnline: false,
-      models: []
-    };
-
-    // ── DOM Elements ──
-    const $ = (sel) => document.querySelector(sel);
-    const $$ = (sel) => document.querySelectorAll(sel);
-
-    const elements = {
-      // Sidebar
-      sidebar: $('#sidebar'),
-      sidebarOverlay: $('#sidebarOverlay'),
-      sidebarToggle: $('#sidebarToggle'),
-
-      // Status
-      ollamaStatusDot: $('#ollamaStatusDot'),
-      ollamaStatusText: $('#ollamaStatusText'),
-      ollamaVersion: $('#ollamaVersion'),
-      apiStatusDot: $('#apiStatusDot'),
-      apiStatusText: $('#apiStatusText'),
-      apiLatency: $('#apiLatency'),
-
-      // Model & Params
-      modelSelect: $('#modelSelect'),
-      refreshModelsBtn: $('#refreshModelsBtn'),
-      temperatureSlider: $('#temperatureSlider'),
-      temperatureValue: $('#temperatureValue'),
-      maxTokensSlider: $('#maxTokensSlider'),
-      maxTokensValue: $('#maxTokensValue'),
-
-      // Sidebar Panels
-      sidebarNavBtns: $$('.sidebar-nav-btn'),
-      sidebarSections: $$('.sidebar-section'),
-
-      // Chat
-      chatMessages: $('#chatMessages'),
-      chatInput: $('#chatInput'),
-      sendBtn: $('#sendBtn'),
-      welcomeMessage: $('#welcomeMessage'),
-      quickPromptBtns: $$('.quick-prompt-btn'),
-
-      // Tabs
-      tabBtns: $$('.tab-btn'),
-      tabPanes: $$('.tab-pane'),
-
-      // Image Gen
-      imagePromptInput: $('#imagePromptInput'),
-      generateImageBtn: $('#generateImageBtn'),
-      clearImagePromptBtn: $('#clearImagePromptBtn'),
-      styleBtns: $$('.style-btn'),
-      imageGallery: $('#imageGallery'),
-      galleryEmpty: $('#galleryEmpty'),
-
-      // Settings (sidebar)
-      ollamaUrlInput: $('#ollamaUrl'),
-      apiLocalUrlInput: $('#apiLocalUrl'),
-      geminiKeyInput: $('#geminiKey'),
-      openaiKeyInput: $('#openaiKey'),
-      anthropicKeyInput: $('#anthropicKey'),
-      saveApiKeysBtn: $('#saveApiKeysBtn'),
-      testConnectionsBtn: $('#testConnectionsBtn'),
-
-      // Settings (config tab)
-      configOllamaUrl: $('#configOllamaUrl'),
-      configApiUrl: $('#configApiUrl'),
-      configModel: $('#configModel'),
-      configTemperature: $('#configTemperature'),
-      configTempValue: $('#configTempValue'),
-      configMaxTokens: $('#configMaxTokens'),
-      configTokensValue: $('#configTokensValue'),
-      configGeminiKey: $('#configGeminiKey'),
-      configOpenaiKey: $('#configOpenaiKey'),
-      configAnthropicKey: $('#configAnthropicKey'),
-      saveAllSettingsBtn: $('#saveAllSettingsBtn'),
-      resetSettingsBtn: $('#resetSettingsBtn'),
-
-      // History
-      historyList: $('#historyList'),
-      clearHistoryBtn: $('#clearHistoryBtn'),
-
-      // Header
-      newChatBtn: $('#newChatBtn'),
-      exportChatBtn: $('#exportChatBtn'),
-
-      // Modals
-      imagePreviewModal: $('#imagePreviewModal'),
-      closePreviewModal: $('#closePreviewModal'),
-      closePreviewBtn: $('#closePreviewBtn'),
-      previewImage: $('#previewImage'),
-      previewModalTitle: $('#previewModalTitle'),
-      downloadPreviewBtn: $('#downloadPreviewBtn'),
-      confirmModal: $('#confirmModal'),
-      confirmModalTitle: $('#confirmModalTitle'),
-      confirmModalText: $('#confirmModalText'),
-      confirmModalCancel: $('#confirmModalCancel'),
-      confirmModalOk: $('#confirmModalOk'),
-
-      // Toast
-      toastContainer: $('#toastContainer'),
-
-      // Misc
-      attachBtn: $('#attachBtn'),
-      micBtn: $('#micBtn'),
-      apiKeyToggles: $$('.api-key-toggle')
-    };
-
-    // ── Toast Notifications ──
-    function showToast(message, type = 'info', duration = 3000) {
-      const icons = { success: 'check-circle', error: 'times-circle', warning: 'exclamation-triangle', info: 'info-circle' };
-      const toast = document.createElement('div');
-      toast.className = `toast ${type}`;
-      toast.innerHTML = `<i class="fas fa-${icons[type] || 'info-circle'}"></i><span>${message}</span>`;
-      elements.toastContainer.appendChild(toast);
-      setTimeout(() => {
-        toast.classList.add('toast-out');
-        setTimeout(() => toast.remove(), 300);
-      }, duration);
+    /* ============================================
+       LOADING OVERLAY
+       ============================================ */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(10, 10, 15, 0.85);
+        backdrop-filter: blur(10px);
+        z-index: 10000;
+        display: none;
+        align-items: center;
+        justify-content: center;
     }
 
-    // ── API Communication ──
-    async function checkOllamaStatus() {
-      try {
-        const start = Date.now();
-        const res = await fetch(`${state.ollamaUrl}/api/tags`, { signal: AbortSignal.timeout(5000) });
-        const latency = Date.now() - start;
-        if (res.ok) {
-          state.ollamaOnline = true;
-          elements.ollamaStatusDot.className = 'status-dot online';
-          elements.ollamaStatusText.textContent = 'Online';
-          elements.ollamaVersion.textContent = `${latency}ms`;
-          return true;
-        }
-      } catch (e) {
-        // Ollama offline
-      }
-      state.ollamaOnline = false;
-      elements.ollamaStatusDot.className = 'status-dot offline';
-      elements.ollamaStatusText.textContent = 'Offline';
-      elements.ollamaVersion.textContent = '';
-      return false;
+    .loading-overlay.active {
+        display: flex;
     }
 
-    async function checkApiStatus() {
-      try {
-        const start = Date.now();
-        const res = await fetch(`${state.apiUrl}/health`, { signal: AbortSignal.timeout(3000) });
-        const latency = Date.now() - start;
-        if (res.ok) {
-          state.apiOnline = true;
-          elements.apiStatusDot.className = 'status-dot online';
-          elements.apiStatusText.textContent = 'API Online';
-          elements.apiLatency.textContent = `${latency}ms`;
-          return true;
-        }
-      } catch (e) {
-        // API offline
-      }
-      state.apiOnline = false;
-      elements.apiStatusDot.className = 'status-dot offline';
-      elements.apiStatusText.textContent = 'API Offline';
-      elements.apiLatency.textContent = '';
-      return false;
+    .loading-content {
+        text-align: center;
     }
 
-    async function fetchModels() {
-      try {
-        const res = await fetch(`${state.ollamaUrl}/api/tags`, { signal: AbortSignal.timeout(5000) });
-        if (!res.ok) throw new Error('Failed');
-        const data = await res.json();
-        state.models = data.models || [];
-        populateModelSelects();
-      } catch (e) {
-        state.models = [
-          { name: 'llama3:latest' },
-          { name: 'llama3:8b' },
-          { name: 'llama3:70b' },
-          { name: 'mistral:latest' },
-          { name: 'codellama:latest' },
-          { name: 'gemma:latest' },
-          { name: 'qwen:latest' }
+    .loading-spinner {
+        width: 60px;
+        height: 60px;
+        border: 3px solid rgba(0, 240, 255, 0.2);
+        border-top-color: var(--cyan);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 16px;
+    }
+
+    .loading-text {
+        font-family: 'Orbitron', sans-serif;
+        color: var(--cyan);
+        font-size: 1rem;
+        letter-spacing: 2px;
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    /* ============================================
+       TYPING INDICATOR
+       ============================================ */
+    .typing-indicator {
+        display: none;
+        position: fixed;
+        bottom: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--bg-panel);
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        border-radius: 20px;
+        padding: 8px 16px;
+        z-index: 100;
+    }
+
+    .typing-indicator.active {
+        display: flex;
+        gap: 4px;
+    }
+
+    .typing-dot {
+        width: 8px;
+        height: 8px;
+        background: var(--cyan);
+        border-radius: 50%;
+        animation: typingBounce 1.4s ease-in-out infinite;
+    }
+
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typingBounce {
+        0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+        30% { transform: translateY(-8px); opacity: 1; }
+    }
+
+    /* ============================================
+       SELETOR CYBERPUNK
+       ============================================ */
+    .cyber-select {
+        width: 100%;
+        padding: 8px 12px;
+        background: var(--bg-glass);
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        border-radius: 4px;
+        color: var(--text-primary);
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.9rem;
+        cursor: pointer;
+        outline: none;
+        transition: all 0.3s;
+    }
+
+    .cyber-select:focus {
+        border-color: var(--cyan);
+        box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    }
+
+    .cyber-select option {
+        background: var(--bg-dark);
+        color: var(--text-primary);
+    }
+
+    .cyber-btn-small {
+        padding: 6px 12px;
+        background: rgba(255, 0, 255, 0.1);
+        border: 1px solid rgba(255, 0, 255, 0.3);
+        border-radius: 4px;
+        color: var(--magenta);
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .cyber-btn-small:hover {
+        background: rgba(255, 0, 255, 0.2);
+        box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+    }=
+            LOADING OVERLAY
+            ============================================ */
+         .loading-overlay {
+             position: fixed;
+             top: 0;
+             left: 0;
+             width: 100%;
+             height: 100%;
+             background: rgba(10, 10, 15, 0.85);
+             backdrop-filter: blur(10px);
+             z-index: 10000;
+             display: none;
+             align-items: center;
+             justify-content: center;
+         }
+
+         .loading-overlay.active {
+             display: flex;
+         }
+
+         .loading-content {
+             text-align: center;
+         }
+
+         .loading-spinner {
+             width: 60px;
+             height: 60px;
+             border: 3px solid rgba(0, 240, 255, 0.2);
+             border-top-color: var(--cyan);
+             border-radius: 50%;
+             animation: spin 1s linear infinite;
+             margin: 0 auto 16px;
+         }
+
+         .loading-text {
+             font-family: 'Orbitron', sans-serif;
+             color: var(--cyan);
+             font-size: 1rem;
+             letter-spacing: 2px;
+             animation: pulse 1.5s ease-in-out infinite;
+         }
+
+         @keyframes spin {
+             to { transform: rotate(360deg); }
+         }
+
+         @keyframes pulse {
+             0%, 100% { opacity: 1; }
+             50% { opacity: 0.5; }
+         }
+
+         /* ============================================
+            TYPING INDICATOR
+            ============================================ */
+         .typing-indicator {
+             display: none;
+             position: fixed;
+             bottom: 80px;
+             left: 50%;
+             transform: translateX(-50%);
+             background: var(--bg-panel);
+             border: 1px solid rgba(0, 240, 255, 0.3);
+             border-radius: 20px;
+             padding: 8px 16px;
+             z-index: 100;
+         }
+
+         .typing-indicator.active {
+             display: flex;
+             gap: 4px;
+         }
+
+         .typing-dot {
+             width: 8px;
+             height: 8px;
+             background: var(--cyan);
+             border-radius: 50%;
+             animation: typingBounce 1.4s ease-in-out infinite;
+         }
+
+         .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+         .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+         @keyframes typingBounce {
+             0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+             30% { transform: translateY(-8px); opacity: 1; }
+         }
+
+         /* ============================================
+            SELETOR CYBERPUNK
+            ============================================ */
+         .cyber-select {
+             width: 100%;
+             padding: 8px 12px;
+             background: var(--bg-glass);
+             border: 1px solid rgba(0, 240, 255, 0.3);
+             border-radius: 4px;
+             color: var(--text-primary);
+             font-family: 'Rajdhani', sans-serif;
+             font-size: 0.9rem;
+             cursor: pointer;
+             outline: none;
+             transition: all 0.3s;
+         }
+
+         .cyber-select:focus {
+             border-color: var(--cyan);
+             box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+         }
+
+         .cyber-select option {
+             background: var(--bg-dark);
+             color: var(--text-primary);
+         }
+
+         .cyber-btn-small {
+             padding: 6px 12px;
+             background: rgba(255, 0, 255, 0.1);
+             border: 1px solid rgba(255, 0, 255, 0.3);
+             border-radius: 4px;
+             color: var(--magenta);
+             font-family: 'Rajdhani', sans-serif;
+             font-size: 0.8rem;
+             cursor: pointer;
+             transition: all 0.3s;
+         }
+
+         .cyber-btn-small:hover {
+             background: rgba(255, 0, 255, 0.2);
+             box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+         }
+       LOADING OVERLAY
+       ============================================ */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(10, 10, 15, 0.85);
+        backdrop-filter: blur(10px);
+        z-index: 10000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .loading-overlay.active {
+        display: flex;
+    }
+
+    .loading-content {
+        text-align: center;
+    }
+
+    .loading-spinner {
+        width: 60px;
+        height: 60px;
+        border: 3px solid rgba(0, 240, 255, 0.2);
+        border-top-color: var(--cyan);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 16px;
+    }
+
+    .loading-text {
+        font-family: 'Orbitron', sans-serif;
+        color: var(--cyan);
+        font-size: 1rem;
+        letter-spacing: 2px;
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    /* ============================================
+       TYPING INDICATOR
+       ============================================ */
+    .typing-indicator {
+        display: none;
+        position: fixed;
+        bottom: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--bg-panel);
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        border-radius: 20px;
+        padding: 8px 16px;
+        z-index: 100;
+    }
+
+    .typing-indicator.active {
+        display: flex;
+        gap: 4px;
+    }
+
+    .typing-dot {
+        width: 8px;
+        height: 8px;
+        background: var(--cyan);
+        border-radius: 50%;
+        animation: typingBounce 1.4s ease-in-out infinite;
+    }
+
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typingBounce {
+        0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+        30% { transform: translateY(-8px); opacity: 1; }
+    }
+
+    /* ============================================
+       SELETOR CYBERPUNK
+       ============================================ */
+    .cyber-select {
+        width: 100%;
+        padding: 8px 12px;
+        background: var(--bg-glass);
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        border-radius: 4px;
+        color: var(--text-primary);
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.9rem;
+        cursor: pointer;
+        outline: none;
+        transition: all 0.3s;
+    }
+
+    .cyber-select:focus {
+        border-color: var(--cyan);
+        box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    }
+
+    .cyber-select option {
+        background: var(--bg-dark);
+        color: var(--text-primary);
+    }
+
+    .cyber-btn-small {
+        padding: 6px 12px;
+        background: rgba(255, 0, 255, 0.1);
+        border: 1px solid rgba(255, 0, 255, 0.3);
+        border-radius: 4px;
+        color: var(--magenta);
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .cyber-btn-small:hover {
+        background: rgba(255, 0, 255, 0.2);
+        box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+    }
+    (function initThreeBackground() {
+        const canvas = document.getElementById('three-background');
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 50;
+
+        // Sistema de particulas
+        const particleCount = 800;
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+        const colors = new Float32Array(particleCount * 3);
+
+        const cores = [
+            [0, 0.94, 1],      // cyan
+            [1, 0, 1],         // magenta
+            [0.55, 0, 1],      // purple
         ];
-        populateModelSelects();
-      }
-    }
 
-    function populateModelSelects() {
-      const options = state.models.length > 0
-        ? state.models.map(m => `<option value="${m.name}" ${state.model === m.name ? 'selected' : ''}>${m.name}</option>`).join('')
-        : '<option value="">Nenhum modelo encontrado</option>';
+        for (let i = 0; i < particleCount; i++) {
+            positions[i * 3] = (Math.random() - 0.5) * 150;
+            positions[i * 3 + 1] = (Math.random() - 0.5) * 150;
+            positions[i * 3 + 2] = (Math.random() - 0.5) * 100;
 
-      elements.modelSelect.innerHTML = options;
-      elements.configModel.innerHTML = options;
-
-      if (!state.model && state.models.length > 0) {
-        state.model = state.models[0].name;
-        elements.modelSelect.value = state.model;
-        elements.configModel.value = state.model;
-        localStorage.setItem('atena_model', state.model);
-      }
-    }
-
-    async function sendMessage(content) {
-      if (!content.trim() || state.isStreaming) return;
-
-      // Hide welcome message
-      if (elements.welcomeMessage) {
-        elements.welcomeMessage.style.display = 'none';
-      }
-
-      // Add user message
-      const userMsg = { role: 'user', content: content.trim(), timestamp: Date.now() };
-      state.messages.push(userMsg);
-      appendMessageBubble('user', content.trim());
-      elements.chatInput.value = '';
-      elements.chatInput.style.height = 'auto';
-
-      // Show typing indicator
-      showTypingIndicator();
-
-      // Check if API local is available, otherwise use Ollama directly
-      try {
-        state.isStreaming = true;
-        elements.sendBtn.disabled = true;
-
-        let response;
-        if (state.apiOnline) {
-          response = await fetch(`${state.apiUrl}/api/chat`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              model: state.model,
-              messages: state.messages,
-              temperature: state.temperature,
-              max_tokens: state.maxTokens,
-              stream: true
-            })
-          });
-        } else {
-          response = await fetch(`${state.ollamaUrl}/api/chat`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              model: state.model || 'llama3:latest',
-              messages: state.messages.map(m => ({ role: m.role, content: m.content })),
-              stream: true,
-              options: {
-                temperature: state.temperature,
-                num_predict: state.maxTokens
-              }
-            })
-          });
+            const cor = cores[Math.floor(Math.random() * cores.length)];
+            colors[i * 3] = cor[0];
+            colors[i * 3 + 1] = cor[1];
+            colors[i * 3 + 2] = cor[2];
         }
 
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+        const material = new THREE.PointsMaterial({
+            size: 1.2,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.7,
+            blending: THREE.AdditiveBlending,
+            sizeAttenuation: true,
+        });
+
+        const particles = new THREE.Points(geometry, material);
+        scene.add(particles);
+
+        // Linhas de conexao (efeito rede)
+        const lineGeometry = new THREE.BufferGeometry();
+        const linePositions = new Float32Array(200 * 6); // 200 linhas
+        lineGeometry.setAttribute('position', new THREE.BufferAttribute(linePositions, 3));
+
+        const lineMaterial = new THREE.LineBasicMaterial({
+            color: 0x00f0ff,
+            transparent: true,
+            opacity: 0.1,
+            blending: THREE.AdditiveBlending,
+        });
+
+        const lines = new THREE.LineSegments(lineGeometry, lineMaterial);
+        scene.add(lines);
+
+        // Animacao
+        let time = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.002;
+
+            particles.rotation.y = time * 0.3;
+            particles.rotation.x = Math.sin(time) * 0.1;
+
+            camera.position.x = Math.sin(time * 0.5) * 5;
+
+            renderer.render(scene, camera);
         }
+        animate();
 
-        // Stream response
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let assistantContent = '';
-        let assistantDiv = null;
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    })();
 
-        removeTypingIndicator();
+    /* ============================================
+       LOADING OVERLAY
+       ============================================ */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(10, 10, 15, 0.85);
+        backdrop-filter: blur(10px);
+        z-index: 10000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+    }
 
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
+    .loading-overlay.active {
+        display: flex;
+    }
 
-          const chunk = decoder.decode(value, { stream: true });
-          const lines = chunk.split('\n').filter(l => l.trim());
+    .loading-content {
+        text-align: center;
+    }
 
-          for (const line of lines) {
-            try {
-              const data = JSON.parse(line);
-              const content = data.message?.content || data.response || '';
-              if (content) {
-                assistantContent += content;
-                if (!assistantDiv) {
-                  assistantDiv = appendMessageBubble('atena', assistantContent, true);
-                } else {
-                  const bubble = assistantDiv.querySelector('.message-bubble');
-                  if (bubble) {
-                    bubble.textContent = assistantContent;
-                    scrollToBottom();
-                  }
+    .loading-spinner {
+        width: 60px;
+        height: 60px;
+        border: 3px solid rgba(0, 240, 255, 0.2);
+        border-top-color: var(--cyan);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 16px;
+    }
+
+    .loading-text {
+        font-family: 'Orbitron', sans-serif;
+        color: var(--cyan);
+        font-size: 1rem;
+        letter-spacing: 2px;
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    /* ============================================
+       TYPING INDICATOR
+       ============================================ */
+    .typing-indicator {
+        display: none;
+        position: fixed;
+        bottom: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--bg-panel);
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        border-radius: 20px;
+        padding: 8px 16px;
+        z-index: 100;
+    }
+
+    .typing-indicator.active {
+        display: flex;
+        gap: 4px;
+    }
+
+    .typing-dot {
+        width: 8px;
+        height: 8px;
+        background: var(--cyan);
+        border-radius: 50%;
+        animation: typingBounce 1.4s ease-in-out infinite;
+    }
+
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typingBounce {
+        0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+        30% { transform: translateY(-8px); opacity: 1; }
+    }
+
+    /* ============================================
+       SELETOR CYBERPUNK
+       ============================================ */
+    .cyber-select {
+        width: 100%;
+        padding: 8px 12px;
+        background: var(--bg-glass);
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        border-radius: 4px;
+        color: var(--text-primary);
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.9rem;
+        cursor: pointer;
+        outline: none;
+        transition: all 0.3s;
+    }
+
+    .cyber-select:focus {
+        border-color: var(--cyan);
+        box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    }
+
+    .cyber-select option {
+        background: var(--bg-dark);
+        color: var(--text-primary);
+    }
+
+    .cyber-btn-small {
+        padding: 6px 12px;
+        background: rgba(255, 0, 255, 0.1);
+        border: 1px solid rgba(255, 0, 255, 0.3);
+        border-radius: 4px;
+        color: var(--magenta);
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .cyber-btn-small:hover {
+        background: rgba(255, 0, 255, 0.2);
+        box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+    }
+    (function initTronGrid() {
+        const canvas = document.getElementById('tron-grid');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let offset = 0;
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        resize();
+        window.addEventListener('resize', resize);
+
+        function draw() {
+            ctx.clearRect(0, 0, width, height);
+            offset = (offset + 0.5) % 40;
+
+            ctx.strokeStyle = 'rgba(0, 240, 255, 0.15)';
+            ctx.lineWidth = 0.5;
+
+            // Linhas horizontais (perspectiva)
+            const vanishY = height * 0.3;
+            for (let i = 0; i < 20; i++) {
+                ctx.beginPath();
+                const y = vanishY + (i * 20) + offset;
+                if (y < height) {
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(width, y);
+                    ctx.stroke();
                 }
-              }
-              if (data.done) break;
-            } catch (e) {
-              // Skip malformed JSON lines
             }
-          }
-        }
 
-        if (assistantContent) {
-          state.messages.push({ role: 'atena', content: assistantContent, timestamp: Date.now() });
-          saveConversation();
-        } else if (!assistantContent && assistantDiv) {
-          assistantDiv.remove();
-          appendMessageBubble('atena', 'Desculpe, não consegui gerar uma resposta. Tente novamente.');
-        }
-
-      } catch (error) {
-        removeTypingIndicator();
-        console.error('Chat error:', error);
-        appendMessageBubble('atena', `Erro: ${error.message}. Verifique se o Ollama está rodando em ${state.ollamaUrl}`);
-        showToast('Erro ao enviar mensagem', 'error');
-      } finally {
-        state.isStreaming = false;
-        elements.sendBtn.disabled = false;
-        scrollToBottom();
-      }
-    }
-
-    // ── Message Bubbles ──
-    function appendMessageBubble(role, content, streaming = false) {
-      const time = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-      const isUser = role === 'user';
-
-      const msgDiv = document.createElement('div');
-      msgDiv.className = `message ${role}`;
-      if (streaming) msgDiv.dataset.streaming = 'true';
-
-      msgDiv.innerHTML = `
-        <div class="message-avatar">
-          <i class="fas fa-${isUser ? 'user' : 'robot'}"></i>
-        </div>
-        <div class="message-body">
-          <span class="message-sender">${isUser ? 'Você' : 'Atena'}</span>
-          <div class="message-bubble">${formatMessage(content)}</div>
-          <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-            <span class="message-time">${time}</span>
-            <div class="message-actions">
-              <button class="message-action-btn" onclick="copyMessage(this)" data-tooltip="Copiar">
-                <i class="fas fa-copy"></i>
-              </button>
-              ${!isUser ? `
-                <button class="message-action-btn" onclick="regenerateMessage(this)" data-tooltip="Regenerar">
-                  <i class="fas fa-redo"></i>
-                </button>
-              ` : ''}
-            </div>
-          </div>
-        </div>
-      `;
-
-      elements.chatMessages.appendChild(msgDiv);
-      scrollToBottom();
-      return msgDiv;
-    }
-
-    function formatMessage(text) {
-      // Basic markdown-like formatting
-      // First escape HTML entities
-      let html = text
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-
-      // Code blocks (process before inline code)
-      html = html.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
-
-      // Inline code
-      html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
-
-      // Bold and italic
-      html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-      html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
-
-      // Line breaks (process last)
-      html = html.replace(/\n/g, '<br>');
-
-      return html;
-    }
-
-    function showTypingIndicator() {
-      const div = document.createElement('div');
-      div.className = 'message atena';
-      div.id = 'typingIndicator';
-      div.innerHTML = `
-        <div class="message-avatar"><i class="fas fa-robot"></i></div>
-        <div class="message-body">
-          <span class="message-sender">Atena</span>
-          <div class="typing-indicator">
-            <span></span><span></span><span></span>
-          </div>
-        </div>
-      `;
-      elements.chatMessages.appendChild(div);
-      scrollToBottom();
-    }
-
-    function removeTypingIndicator() {
-      const el = $('#typingIndicator');
-      if (el) el.remove();
-    }
-
-    function scrollToBottom() {
-      elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
-    }
-
-    // ── Global Functions (for inline onclick) ──
-    window.copyMessage = function(btn) {
-      const bubble = btn.closest('.message-body').querySelector('.message-bubble');
-      navigator.clipboard.writeText(bubble.textContent).then(() => {
-        showToast('Mensagem copiada!', 'success');
-      });
-    };
-
-    window.regenerateMessage = function(btn) {
-      // Find the previous user message and resend
-      const messages = state.messages;
-      for (let i = messages.length - 1; i >= 0; i--) {
-        if (messages[i].role === 'user') {
-          // Remove messages after this point
-          state.messages = messages.slice(0, i + 1);
-          // Remove DOM messages after this point
-          const msgElements = $$('.message');
-          let found = false;
-          msgElements.forEach(el => {
-            if (found) el.remove();
-            if (el === btn.closest('.message')) found = true;
-          });
-          sendMessage(messages[i].content);
-          return;
-        }
-      }
-    };
-
-    // ── Image Generation ──
-    async function generateImage() {
-      const prompt = elements.imagePromptInput.value.trim();
-      if (!prompt) {
-        showToast('Descreva a imagem que deseja gerar', 'warning');
-        return;
-      }
-
-      const stylePrompts = {
-        'realista': 'photorealistic, highly detailed, 8k, professional photography',
-        'artistico': 'artistic, creative, expressive, fine art style',
-        'cartoon': 'cartoon style, colorful, fun, animated look',
-        'anime': 'anime style, manga, Japanese animation, vibrant colors',
-        '3d': '3D render, CGI, volumetric lighting, octane render',
-        'pixel': 'pixel art, retro game style, 16-bit, pixelated',
-        'oil': 'oil painting, classical art, textured brushstrokes, museum quality',
-        'watercolor': 'watercolor painting, soft edges, flowing colors, artistic'
-      };
-
-      const fullPrompt = `${prompt}, ${stylePrompts[state.selectedStyle] || ''}`;
-
-      elements.generateImageBtn.disabled = true;
-      elements.generateImageBtn.innerHTML = '<div class="spinner"></div> Gerando...';
-
-      try {
-        // Try local API first, then Ollama
-        let imageData = null;
-
-        if (state.apiOnline) {
-          try {
-            const res = await fetch(`${state.apiUrl}/api/generate-image`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ prompt: fullPrompt, style: state.selectedStyle })
-            });
-            if (res.ok) {
-              const data = await res.json();
-              imageData = data.image;
+            // Linhas verticais (perspectiva)
+            const vanishX = width / 2;
+            for (let i = -15; i <= 15; i++) {
+                ctx.beginPath();
+                ctx.moveTo(vanishX, 0);
+                ctx.lineTo(vanishX + i * 80, height);
+                ctx.stroke();
             }
-          } catch (e) { /* fallback */ }
+
+            // Grid inferior (chao)
+            ctx.strokeStyle = 'rgba(139, 0, 255, 0.08)';
+            for (let i = 0; i < 30; i++) {
+                ctx.beginPath();
+                const y = height - 100 + (i * 8) + (offset * 0.5);
+                if (y < height && y > height - 200) {
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(width, y);
+                    ctx.stroke();
+                }
+            }
+
+            requestAnimationFrame(draw);
         }
 
-        // If no API image, create a placeholder with SVG
-        if (!imageData) {
-          // Generate a unique colored placeholder
-          const colors = {
-            'realista': ['#1a1a3e', '#2d1b69', '#0d47a1'],
-            'artistico': ['#4a1942', '#6b2fa0', '#e91e63'],
-            'cartoon': ['#ff6f00', '#ffca28', '#76ff03'],
-            'anime': ['#e91e63', '#9c27b0', '#ff4081'],
-            '3d': ['#00bcd4', '#009688', '#00e5ff'],
-            'pixel': ['#76ff03', '#64dd17', '#00c853'],
-            'oil': ['#795548', '#8d6e63', '#a1887f'],
-            'watercolor': ['#42a5f5', '#26c6da', '#80deea']
-          };
-          const palette = colors[state.selectedStyle] || colors['realista'];
-          const hash = prompt.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
-          const c1 = palette[hash % palette.length];
-          const c2 = palette[(hash + 1) % palette.length];
-          const c3 = palette[(hash + 2) % palette.length];
+        draw();
+    })();
 
-          const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-            <defs>
-              <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" style="stop-color:${c1}"/>
-                <stop offset="50%" style="stop-color:${c2}"/>
-                <stop offset="100%" style="stop-color:${c3}"/>
-              </linearGradient>
-              <filter id="blur"><feGaussianBlur stdDeviation="20"/></filter>
-            </defs>
-            <rect width="512" height="512" fill="url(#g)"/>
-            <circle cx="${128 + (hash % 256)}" cy="${100 + (hash % 100)}" r="80" fill="${c2}" opacity="0.3" filter="url(#blur)"/>
-            <circle cx="${300 + (hash % 100)}" cy="${350 + (hash % 100)}" r="120" fill="${c3}" opacity="0.2" filter="url(#blur)"/>
-            <circle cx="${400}" cy="${150}" r="60" fill="${c1}" opacity="0.25" filter="url(#blur)"/>
-            <text x="256" y="240" text-anchor="middle" fill="white" font-size="18" font-family="Inter,sans-serif" opacity="0.9">${state.selectedStyle.toUpperCase()}</text>
-            <text x="256" y="270" text-anchor="middle" fill="white" font-size="12" font-family="Inter,sans-serif" opacity=".6">${prompt.substring(0, 40)}${prompt.length > 40 ? '...' : ''}</text>
-            <text x="256" y="300" text-anchor="middle" fill="white" font-size="10" font-family="Inter,sans-serif" opacity="0.4">Atena Evolução • Preview</text>
-          </svg>`;
-          imageData = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
+    /* ============================================
+       LOADING OVERLAY
+       ============================================ */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(10, 10, 15, 0.85);
+        backdrop-filter: blur(10px);
+        z-index: 10000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .loading-overlay.active {
+        display: flex;
+    }
+
+    .loading-content {
+        text-align: center;
+    }
+
+    .loading-spinner {
+        width: 60px;
+        height: 60px;
+        border: 3px solid rgba(0, 240, 255, 0.2);
+        border-top-color: var(--cyan);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 16px;
+    }
+
+    .loading-text {
+        font-family: 'Orbitron', sans-serif;
+        color: var(--cyan);
+        font-size: 1rem;
+        letter-spacing: 2px;
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    /* ============================================
+       TYPING INDICATOR
+       ============================================ */
+    .typing-indicator {
+        display: none;
+        position: fixed;
+        bottom: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--bg-panel);
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        border-radius: 20px;
+        padding: 8px 16px;
+        z-index: 100;
+    }
+
+    .typing-indicator.active {
+        display: flex;
+        gap: 4px;
+    }
+
+    .typing-dot {
+        width: 8px;
+        height: 8px;
+        background: var(--cyan);
+        border-radius: 50%;
+        animation: typingBounce 1.4s ease-in-out infinite;
+    }
+
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typingBounce {
+        0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+        30% { transform: translateY(-8px); opacity: 1; }
+    }
+
+    /* ============================================
+       SELETOR CYBERPUNK
+       ============================================ */
+    .cyber-select {
+        width: 100%;
+        padding: 8px 12px;
+        background: var(--bg-glass);
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        border-radius: 4px;
+        color: var(--text-primary);
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.9rem;
+        cursor: pointer;
+        outline: none;
+        transition: all 0.3s;
+    }
+
+    .cyber-select:focus {
+        border-color: var(--cyan);
+        box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    }
+
+    .cyber-select option {
+        background: var(--bg-dark);
+        color: var(--text-primary);
+    }
+
+    .cyber-btn-small {
+        padding: 6px 12px;
+        background: rgba(255, 0, 255, 0.1);
+        border: 1px solid rgba(255, 0, 255, 0.3);
+        border-radius: 4px;
+        color: var(--magenta);
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .cyber-btn-small:hover {
+        background: rgba(255, 0, 255, 0.2);
+        box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+    }
+    (function initD3Chart() {
+        const container = document.getElementById('d3-chart');
+        const margin = { top: 10, right: 10, bottom: 20, left: 30 };
+        const width = container.offsetWidth - margin.left - margin.right;
+        const height = 130 - margin.top - margin.bottom;
+
+        const svg = d3.select(container)
+            .append('svg')
+            .attr('width', width + margin.left + margin.right)
+            .attr('height', height + margin.top + margin.bottom)
+            .append('g')
+            .attr('transform', `translate(${margin.left},${margin.top})`);
+
+        // Dados simulados de performance
+        const data = Array.from({ length: 20 }, () => ({
+            value: Math.random() * 60 + 40
+        }));
+
+        const x = d3.scaleLinear()
+            .domain([0, data.length - 1])
+            .range([0, width]);
+
+        const y = d3.scaleLinear()
+            .domain([0, 100])
+            .range([height, 0]);
+
+        // Gradiente
+        const gradient = svg.append('defs')
+            .append('linearGradient')
+            .attr('id', 'cyanGradient')
+            .attr('x1', '0%').attr('y1', '0%')
+            .attr('x2', '0%').attr('y2', '100%');
+
+        gradient.append('stop').attr('offset', '0%').attr('stop-color', '#00f0ff').attr('stop-opacity', 0.8);
+        gradient.append('stop').attr('offset', '100%').attr('stop-color', '#8b00ff').attr('stop-opacity', 0.1);
+
+        // Area
+        const area = d3.area()
+            .x((d, i) => x(i))
+            .y0(height)
+            .y1(d => y(d.value))
+            .curve(d3.curveMonotoneX);
+
+        svg.append('path')
+            .datum(data)
+            .attr('fill', 'url(#cyanGradient)')
+            .attr('d', area);
+
+        // Linha
+        const line = d3.line()
+            .x((d, i) => x(i))
+            .y(d => y(d.value))
+            .curve(d3.curveMonotoneX);
+
+        svg.append('path')
+            .datum(data)
+            .attr('fill', 'none')
+            .attr('stroke', '#00f0ff')
+            .attr('stroke-width', 2)
+            .attr('d', line);
+
+        // Pontos
+        svg.selectAll('.dot')
+            .data(data)
+            .enter().append('circle')
+            .attr('cx', (d, i) => x(i))
+            .attr('cy', d => y(d.value))
+            .attr('r', 2)
+            .attr('fill', '#00f0ff')
+            .attr('filter', 'drop-shadow(0 0 3px #00f0ff)');
+
+        // Eixo Y
+        svg.append('g')
+            .call(d3.axisLeft(y).ticks(4).tickFormat(d => d + '%'))
+            .selectAll('text')
+            .attr('fill', '#70a0b0')
+            .attr('font-size', '9px')
+            .attr('font-family', 'Orbitron');
+
+        svg.selectAll('.domain, .tick line')
+            .attr('stroke', 'rgba(0, 240, 255, 0.2)');
+
+        // Animacao de atualizacao
+        setInterval(() => {
+            data.shift();
+            data.push({ value: Math.random() * 60 + 40 });
+
+            svg.selectAll('path').datum(data);
+            svg.select('path[fill="url(#cyanGradient)"]').attr('d', area);
+            svg.select('path[fill="none"]').attr('d', line);
+
+            svg.selectAll('.dot').remove();
+            svg.selectAll('.dot')
+                .data(data)
+                .enter().append('circle')
+                .attr('cx', (d, i) => x(i))
+                .attr('cy', d => y(d.value))
+                .attr('r', 2)
+                .attr('fill', '#00f0ff')
+                .attr('filter', 'drop-shadow(0 0 3px #00f0ff)');
+        }, 2000);
+    })();
+
+    /* ============================================
+       LOADING OVERLAY
+       ============================================ */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(10, 10, 15, 0.85);
+        backdrop-filter: blur(10px);
+        z-index: 10000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .loading-overlay.active {
+        display: flex;
+    }
+
+    .loading-content {
+        text-align: center;
+    }
+
+    .loading-spinner {
+        width: 60px;
+        height: 60px;
+        border: 3px solid rgba(0, 240, 255, 0.2);
+        border-top-color: var(--cyan);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 16px;
+    }
+
+    .loading-text {
+        font-family: 'Orbitron', sans-serif;
+        color: var(--cyan);
+        font-size: 1rem;
+        letter-spacing: 2px;
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    /* ============================================
+       TYPING INDICATOR
+       ============================================ */
+    .typing-indicator {
+        display: none;
+        position: fixed;
+        bottom: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--bg-panel);
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        border-radius: 20px;
+        padding: 8px 16px;
+        z-index: 100;
+    }
+
+    .typing-indicator.active {
+        display: flex;
+        gap: 4px;
+    }
+
+    .typing-dot {
+        width: 8px;
+        height: 8px;
+        background: var(--cyan);
+        border-radius: 50%;
+        animation: typingBounce 1.4s ease-in-out infinite;
+    }
+
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typingBounce {
+        0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+        30% { transform: translateY(-8px); opacity: 1; }
+    }
+
+    /* ============================================
+       SELETOR CYBERPUNK
+       ============================================ */
+    .cyber-select {
+        width: 100%;
+        padding: 8px 12px;
+        background: var(--bg-glass);
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        border-radius: 4px;
+        color: var(--text-primary);
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.9rem;
+        cursor: pointer;
+        outline: none;
+        transition: all 0.3s;
+    }
+
+    .cyber-select:focus {
+        border-color: var(--cyan);
+        box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    }
+
+    .cyber-select option {
+        background: var(--bg-dark);
+        color: var(--text-primary);
+    }
+
+    .cyber-btn-small {
+        padding: 6px 12px;
+        background: rgba(255, 0, 255, 0.1);
+        border: 1px solid rgba(255, 0, 255, 0.3);
+        border-radius: 4px;
+        color: var(--magenta);
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .cyber-btn-small:hover {
+        background: rgba(255, 0, 255, 0.2);
+        box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+    }
+    (function initChat() {
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
+        let isTyping = false;
+
+        // Respostas simuladas da Atena
+        const atenaResponses = [
+            "Processando analise de dados... Identifiquei padroes significantes no sistema.",
+            "Modulo de IA ativado. Sincronizacao com servidores concluida com sucesso.",
+            "Analise heuristica em andamento. Estimativa de processamento: 3.7 segundos.",
+            "Protocolo de seguranca verificado. Todos os sistemas operacionais normais.",
+            "Rede neural calibrada. Ajuste de parametros concluido. Precisao atual: 97.3%",
+            "Detectei uma variabilidade interessante nos dados. Deseja que eu aprofunde a analise?",
+            "Cache de memoria otimizado. Velocidade de resposta melhorada em 12%.",
+            "Sistema de vigilancia neural ativo. Nenhuma ameaca detectada no perimetro digital.",
+            "Interface holografica sincronizada. Todos os modulos funcionais.",
+            "Processamento quantico disponivel. Posso executar essa tarefa em tempo recorde."
+        ];
+
+        // Adicionar mensagem ao chat
+        function addMessage(text, isUser) {
+            const welcomeMsg = chatMessages.querySelector('.welcome-msg');
+            if (welcomeMsg) welcomeMsg.remove();
+
+            const bubble = document.createElement('div');
+            bubble.className = `chat-bubble ${isUser ? 'user' : 'ai'}`;
+
+            const label = document.createElement('div');
+            label.className = 'sender-label';
+            label.textContent = isUser ? 'Usuario' : 'Atena Evolucao';
+
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            
+            if (!isUser) {
+                const cursor = document.createElement('span');
+                cursor.className = 'neon-cursor';
+                content.textContent = text;
+                content.appendChild(cursor);
+            } else {
+                content.textContent = text;
+            }
+
+            bubble.appendChild(label);
+            bubble.appendChild(content);
+            chatMessages.appendChild(bubble);
+
+            // Auto-scroll
+            chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
-        // Save to gallery
-        const imageRecord = {
-          id: Date.now().toString(),
-          prompt: prompt,
-          style: state.selectedStyle,
-          imageData: imageData,
-          timestamp: Date.now()
-        };
-        state.images.unshift(imageRecord);
-        if (state.images.length > 50) state.images.pop();
-        localStorage.setItem('atena_images', JSON.stringify(state.images));
+        // Mostrar indicador de digitacao
+        function showTypingIndicator() {
+            if (isTyping) return;
+            isTyping = true;
 
-        renderImageGallery();
-        showToast('Imagem gerada com sucesso!', 'success');
+            const bubble = document.createElement('div');
+            bubble.className = 'chat-bubble ai';
+            bubble.id = 'typingBubble';
 
-      } catch (error) {
-        showToast('Erro ao gerar imagem: ' + error.message, 'error');
-      } finally {
-        elements.generateImageBtn.disabled = false;
-        elements.generateImageBtn.innerHTML = '<i class="fas fa-wand-magic-sparkles"></i> Gerar Imagem';
-      }
-    }
+            const label = document.createElement('div');
+            label.className = 'sender-label';
+            label.textContent = 'Atena Evolucao';
 
-    function renderImageGallery() {
-      if (state.images.length === 0) {
-        elements.galleryEmpty.style.display = 'block';
-        // Remove all image cards
-        elements.imageGallery.querySelectorAll('.image-card').forEach(c => c.remove());
-        return;
-      }
-
-      elements.galleryEmpty.style.display = 'none';
-      elements.imageGallery.querySelectorAll('.image-card').forEach(c => c.remove());
-
-      state.images.forEach(img => {
-        const card = document.createElement('div');
-        card.className = 'image-card';
-        card.innerHTML = `
-          <img class="image-card-img" src="${img.imageData}" alt="${img.prompt}" loading="lazy">
-          <div class="image-card-info">
-            <div class="image-card-prompt">${img.prompt}</div>
-            <div class="image-card-meta">
-              <span class="image-card-style">${img.style}</span>
-              <div class="image-card-actions">
-                <button class="image-card-action preview" onclick="previewImage('${img.id}')" data-tooltip="Visualizar">
-                  <i class="fas fa-eye"></i>
-                </button>
-                <button class="image-card-action download" onclick="downloadImage('${img.id}')" data-tooltip="Download">
-                  <i class="fas fa-download"></i>
-                </button>
-                <button class="image-card-action delete" onclick="deleteImage('${img.id}')" data-tooltip="Excluir">
-                  <i class="fas fa-trash"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-        `;
-        elements.imageGallery.appendChild(card);
-      });
-    }
-
-    window.previewImage = function(id) {
-      const img = state.images.find(i => i.id === id);
-      if (!img) return;
-      elements.previewImage.src = img.imageData;
-      elements.previewModalTitle.textContent = img.prompt.substring(0, 60) + (img.prompt.length > 60 ? '...' : '');
-      elements.imagePreviewModal.classList.add('active');
-      elements.downloadPreviewBtn.dataset.imageId = id;
-    };
-
-    window.downloadImage = function(id) {
-      const img = state.images.find(i => i.id === id);
-      if (!img) return;
-      const a = document.createElement('a');
-      a.href = img.imageData;
-      const ext = img.imageData.startsWith('data:image/svg+xml') ? '.svg' : '.png';
-      a.download = `atena_${img.style}_${img.id}${ext}`;
-      a.click();
-      showToast('Download iniciado!', 'success');
-    };
-
-    window.deleteImage = function(id) {
-      showConfirm('Excluir Imagem', 'Tem certeza que deseja excluir esta imagem?', () => {
-        state.images = state.images.filter(i => i.id !== id);
-        localStorage.setItem('atena_images', JSON.stringify(state.images));
-        renderImageGallery();
-        showToast('Imagem excluída', 'success');
-      });
-    };
-
-    // ── Confirm Modal ──
-    let confirmCallback = null;
-    function showConfirm(title, text, callback) {
-      elements.confirmModalTitle.textContent = title;
-      elements.confirmModalText.textContent = text;
-      confirmCallback = callback;
-      elements.confirmModal.classList.add('active');
-    }
-
-    elements.confirmModalCancel.addEventListener('click', () => {
-      elements.confirmModal.classList.remove('active');
-      confirmCallback = null;
-    });
-
-    elements.confirmModalOk.addEventListener('click', () => {
-      elements.confirmModal.classList.remove('active');
-      if (confirmCallback) confirmCallback();
-      confirmCallback = null;
-    });
-
-    // ── Conversation History ──
-    function saveConversation() {
-      if (state.messages.length === 0) return;
-
-      const conv = {
-        id: state.currentConversationId || Date.now().toString(),
-        title: state.messages[0]?.content.substring(0, 50) || 'Nova conversa',
-        messages: [...state.messages],
-        timestamp: Date.now()
-      };
-
-      const existing = state.conversations.findIndex(c => c.id === conv.id);
-      if (existing >= 0) {
-        state.conversations[existing] = conv;
-      } else {
-        state.conversations.unshift(conv);
-      }
-
-      if (state.conversations.length > 20) state.conversations.pop();
-      state.currentConversationId = conv.id;
-      localStorage.setItem('atena_conversations', JSON.stringify(state.conversations));
-      renderHistory();
-    }
-
-    function renderHistory() {
-      if (state.conversations.length === 0) {
-        elements.historyList.innerHTML = `
-          <div class="history-empty">
-            <i class="fas fa-inbox"></i>
-            <span>Nenhuma conversa ainda</span>
-          </div>
-        `;
-        return;
-      }
-
-      elements.historyList.innerHTML = state.conversations.map(conv => `
-        <div class="history-item" onclick="loadConversation('${conv.id}')">
-          <i class="fas fa-comment-dots"></i>
-          <span>${conv.title}</span>
-          <button class="history-delete" onclick="event.stopPropagation(); deleteConversation('${conv.id}')" data-tooltip="Excluir">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-      `).join('');
-    }
-
-    window.loadConversation = function(id) {
-      const conv = state.conversations.find(c => c.id === id);
-      if (!conv) return;
-
-      state.currentConversationId = id;
-      state.messages = [...conv.messages];
-
-      // Clear and rebuild messages
-      elements.chatMessages.querySelectorAll('.message').forEach(m => m.remove());
-      if (elements.welcomeMessage) elements.welcomeMessage.style.display = 'none';
-
-      state.messages.forEach(msg => {
-        appendMessageBubble(msg.role, msg.content);
-      });
-
-      // Switch to chat tab
-      $$('.tab-btn').forEach(b => b.classList.remove('active'));
-      $$('.tab-pane').forEach(p => p.classList.remove('active'));
-      $$('.tab-btn')[0].classList.add('active');
-      $('#tab-chat').classList.add('active');
-
-      showToast('Conversa carregada', 'success');
-    };
-
-    window.deleteConversation = function(id) {
-      showConfirm('Excluir Conversa', 'Tem certeza que deseja excluir esta conversa?', () => {
-        state.conversations = state.conversations.filter(c => c.id !== id);
-        localStorage.setItem('atena_conversations', JSON.stringify(state.conversations));
-        renderHistory();
-        showToast('Conversa excluída', 'success');
-      });
-    };
-
-    // ── Event Listeners ──
-
-    // Sidebar Toggle
-    elements.sidebarToggle.addEventListener('click', () => {
-      elements.sidebar.classList.toggle('open');
-      elements.sidebarOverlay.classList.toggle('active');
-    });
-
-    elements.sidebarOverlay.addEventListener('click', () => {
-      elements.sidebar.classList.remove('open');
-      elements.sidebarOverlay.classList.remove('active');
-    });
-
-    // Sidebar Navigation
-    elements.sidebarNavBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const panel = btn.dataset.panel;
-        elements.sidebarNavBtns.forEach(b => b.classList.remove('active'));
-        elements.sidebarSections.forEach(s => s.classList.remove('active'));
-        btn.classList.add('active');
-        $(`#panel-${panel}`).classList.add('active');
-      });
-    });
-
-    // Tab Navigation
-    elements.tabBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const tab = btn.dataset.tab;
-        elements.tabBtns.forEach(b => b.classList.remove('active'));
-        elements.tabPanes.forEach(p => p.classList.remove('active'));
-        btn.classList.add('active');
-        $(`#tab-${tab}`).classList.add('active');
-      });
-    });
-
-    // Chat Input Auto-resize
-    elements.chatInput.addEventListener('input', function() {
-      this.style.height = 'auto';
-      this.style.height = Math.min(this.scrollHeight, 120) + 'px';
-    });
-
-    // Send Message
-    elements.sendBtn.addEventListener('click', () => {
-      sendMessage(elements.chatInput.value);
-    });
-
-    elements.chatInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage(elements.chatInput.value);
-      }
-    });
-
-    // Quick Prompts
-    elements.quickPromptBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        sendMessage(btn.dataset.prompt);
-      });
-    });
-
-    // Temperature Slider
-    elements.temperatureSlider.addEventListener('input', function() {
-      state.temperature = parseFloat(this.value);
-      elements.temperatureValue.textContent = this.value;
-      localStorage.setItem('atena_temperature', this.value);
-    });
-
-    // Max Tokens Slider
-    elements.maxTokensSlider.addEventListener('input', function() {
-      state.maxTokens = parseInt(this.value);
-      elements.maxTokensValue.textContent = this.value;
-      localStorage.setItem('atena_maxTokens', this.value);
-    });
-
-    // Model Select
-    elements.modelSelect.addEventListener('change', function() {
-      state.model = this.value;
-      localStorage.setItem('atena_model', this.value);
-    });
-
-    // Refresh Models
-    elements.refreshModelsBtn.addEventListener('click', async () => {
-      elements.refreshModelsBtn.disabled = true;
-      elements.refreshModelsBtn.innerHTML = '<div class="spinner"></div> Carregando...';
-      await fetchModels();
-      elements.refreshModelsBtn.disabled = false;
-      elements.refreshModelsBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Atualizar Modelos';
-      showToast('Modelos atualizados!', 'success');
-    });
-
-    // Style Buttons
-    elements.styleBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        elements.styleBtns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        state.selectedStyle = btn.dataset.style;
-      });
-    });
-
-    // Generate Image
-    elements.generateImageBtn.addEventListener('click', generateImage);
-
-    // Clear Image Prompt
-    elements.clearImagePromptBtn.addEventListener('click', () => {
-      elements.imagePromptInput.value = '';
-      elements.imagePromptInput.focus();
-    });
-
-    // Image Preview Modal
-    elements.closePreviewModal.addEventListener('click', () => {
-      elements.imagePreviewModal.classList.remove('active');
-    });
-
-    elements.closePreviewBtn.addEventListener('click', () => {
-      elements.imagePreviewModal.classList.remove('active');
-    });
-
-    elements.imagePreviewModal.addEventListener('click', (e) => {
-      if (e.target === elements.imagePreviewModal) {
-        elements.imagePreviewModal.classList.remove('active');
-      }
-    });
-
-    elements.downloadPreviewBtn.addEventListener('click', () => {
-      const id = elements.downloadPreviewBtn.dataset.imageId;
-      if (id) downloadImage(id);
-    });
-
-    // New Chat
-    elements.newChatBtn.addEventListener('click', () => {
-      if (state.messages.length > 0) {
-        saveConversation();
-      }
-      state.messages = [];
-      state.currentConversationId = null;
-      elements.chatMessages.querySelectorAll('.message').forEach(m => m.remove());
-      if (elements.welcomeMessage) elements.welcomeMessage.style.display = 'block';
-      showToast('Nova conversa iniciada', 'success');
-    });
-
-    // Export Chat
-    elements.exportChatBtn.addEventListener('click', () => {
-      if (state.messages.length === 0) {
-        showToast('Nenhuma mensagem para exportar', 'warning');
-        return;
-      }
-      const text = state.messages.map(m =>
-        `[${m.role === 'user' ? 'Você' : 'Atena'}] ${new Date(m.timestamp).toLocaleTimeString('pt-BR')}\n${m.content}`
-      ).join('\n\n---\n\n');
-      const blob = new Blob([text], { type: 'text/plain' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `atena_chat_${new Date().toISOString().slice(0, 10)}.txt`;
-      a.click();
-      showToast('Chat exportado!', 'success');
-    });
-
-    // Clear History
-    elements.clearHistoryBtn.addEventListener('click', () => {
-      showConfirm('Limpar Histórico', 'Tem certeza que deseja excluir todo o histórico de conversas?', () => {
-        state.conversations = [];
-        localStorage.removeItem('atena_conversations');
-        renderHistory();
-        showToast('Histórico limpo', 'success');
-      });
-    });
-
-    // API Key Toggle Visibility
-    elements.apiKeyToggles.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const target = $(`#${btn.dataset.target}`);
-        if (target.type === 'password') {
-          target.type = 'text';
-          btn.innerHTML = '<i class="fas fa-eye-slash"></i>';
-        } else {
-          target.type = 'password';
-          btn.innerHTML = '<i class="fas fa-eye"></i>';
+            const dots = document.createElement('div');
+            dots.className = 'typing-indicator';
+            dots.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+            
+            bubble.appendChild(label);
+            bubble.appendChild(dots);
+            chatMessages.appendChild(bubble);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
         }
-      });
-    });
 
-    // Save API Keys (sidebar)
-    elements.saveApiKeysBtn.addEventListener('click', () => {
-      state.ollamaUrl = elements.ollamaUrlInput.value;
-      state.apiUrl = elements.apiLocalUrlInput.value;
-      localStorage.setItem('atena_ollamaUrl', state.ollamaUrl);
-      localStorage.setItem('atena_apiUrl', state.apiUrl);
-      localStorage.setItem('atena_geminiKey', elements.geminiKeyInput.value);
-      localStorage.setItem('atena_openaiKey', elements.openaiKeyInput.value);
-      localStorage.setItem('atena_anthropicKey', elements.anthropicKeyInput.value);
-      showToast('Configurações salvas!', 'success');
-    });
+        function removeTypingIndicator() {
+            const bubble = document.getElementById('typingBubble');
+            if (bubble) bubble.remove();
+            isTyping = false;
+        }
 
-    // Test Connections
-    elements.testConnectionsBtn.addEventListener('click', async () => {
-      showToast('Testando conexões...', 'info', 2000);
-      await checkOllamaStatus();
-      await checkApiStatus();
-      if (state.ollamaOnline) {
-        showToast('Ollama conectado!', 'success');
-      } else {
-        showToast('Ollama não disponível', 'error');
-      }
-    });
+        // Enviar mensagem
+        function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text || isTyping) return;
 
-    // Config Tab Sync
-    function syncConfigTab() {
-      elements.configOllamaUrl.value = state.ollamaUrl;
-      elements.configApiUrl.value = state.apiUrl;
-      elements.configTemperature.value = state.temperature;
-      elements.configTempValue.textContent = state.temperature;
-      elements.configMaxTokens.value = state.maxTokens;
-      elements.configTokensValue.textContent = state.maxTokens;
-      elements.configGeminiKey.value = localStorage.getItem('atena_geminiKey') || '';
-      elements.configOpenaiKey.value = localStorage.getItem('atena_openaiKey') || '';
-      elements.configAnthropicKey.value = localStorage.getItem('atena_anthropicKey') || '';
+            addMessage(text, true);
+            chatInput.value = '';
+
+            // Mostrar digitacao e responder
+            showTypingIndicator();
+
+            setTimeout(() => {
+                removeTypingIndicator();
+                const response = atenaResponses[Math.floor(Math.random() * atenaResponses.length)];
+                addMessage(response, false);
+            }, 1500 + Math.random() * 2000);
+        }
+
+        // Event listeners
+        sendBtn.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Foco inicial
+        chatInput.focus();
+    })();
+
+    /* ============================================
+       LOADING OVERLAY
+       ============================================ */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(10, 10, 15, 0.85);
+        backdrop-filter: blur(10px);
+        z-index: 10000;
+        display: none;
+        align-items: center;
+        justify-content: center;
     }
 
-    elements.configTemperature.addEventListener('input', function() {
-      elements.configTempValue.textContent = this.value;
-    });
-
-    elements.configMaxTokens.addEventListener('input', function() {
-      elements.configTokensValue.textContent = this.value;
-    });
-
-    elements.saveAllSettingsBtn.addEventListener('click', () => {
-      state.ollamaUrl = elements.configOllamaUrl.value;
-      state.apiUrl = elements.configApiUrl.value;
-      state.temperature = parseFloat(elements.configTemperature.value);
-      state.maxTokens = parseInt(elements.configMaxTokens.value);
-      state.model = elements.configModel.value;
-
-      localStorage.setItem('atena_ollamaUrl', state.ollamaUrl);
-      localStorage.setItem('atena_apiUrl', state.apiUrl);
-      localStorage.setItem('atena_temperature', state.temperature);
-      localStorage.setItem('atena_maxTokens', state.maxTokens);
-      localStorage.setItem('atena_model', state.model);
-      localStorage.setItem('atena_geminiKey', elements.configGeminiKey.value);
-      localStorage.setItem('atena_openaiKey', elements.configOpenaiKey.value);
-      localStorage.setItem('atena_anthropicKey', elements.configAnthropicKey.value);
-
-      // Sync sidebar
-      elements.ollamaUrlInput.value = state.ollamaUrl;
-      elements.apiLocalUrlInput.value = state.apiUrl;
-      elements.temperatureSlider.value = state.temperature;
-      elements.temperatureValue.textContent = state.temperature;
-      elements.maxTokensSlider.value = state.maxTokens;
-      elements.maxTokensValue.textContent = state.maxTokens;
-      elements.modelSelect.value = state.model;
-
-      showToast('Configurações salvas com sucesso!', 'success');
-      checkOllamaStatus();
-      checkApiStatus();
-    });
-
-    elements.resetSettingsBtn.addEventListener('click', () => {
-      showConfirm('Restaurar Padrões', 'Todas as configurações serão restauradas aos valores padrão.', () => {
-        localStorage.clear();
-        location.reload();
-      });
-    });
-
-    // Mic button (placeholder)
-    elements.micBtn.addEventListener('click', () => {
-      if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        const recognition = new SpeechRecognition();
-        recognition.lang = 'pt-BR';
-        recognition.onresult = (e) => {
-          elements.chatInput.value = e.results[0][0].transcript;
-          elements.chatInput.dispatchEvent(new Event('input'));
-        };
-        recognition.start();
-        elements.micBtn.style.color = 'var(--accent-red)';
-        showToast('Ouvindo...', 'info');
-        recognition.onend = () => {
-          elements.micBtn.style.color = '';
-        };
-      } else {
-        showToast('Reconhecimento de voz não suportado', 'warning');
-      }
-    });
-
-    // Attach button (placeholder)
-    elements.attachBtn.addEventListener('click', () => {
-      showToast('Funcionalidade em desenvolvimento', 'info');
-    });
-
-    // Theme Toggle (placeholder - dark mode only for now)
-    elements.themeBtn.addEventListener('click', () => {
-      showToast('Tema escuro é o padrão atual', 'info');
-    });
-
-    // Initialize
-    async function init() {
-      // Set initial values
-      elements.temperatureSlider.value = state.temperature;
-      elements.temperatureValue.textContent = state.temperature;
-      elements.maxTokensSlider.value = state.maxTokens;
-      elements.maxTokensValue.textContent = state.maxTokens;
-      elements.ollamaUrlInput.value = state.ollamaUrl;
-      elements.apiLocalUrlInput.value = state.apiUrl;
-      elements.geminiKeyInput.value = localStorage.getItem('atena_geminiKey') || '';
-      elements.openaiKeyInput.value = localStorage.getItem('atena_openaiKey') || '';
-      elements.anthropicKeyInput.value = localStorage.getItem('atena_anthropicKey') || '';
-
-      syncConfigTab();
-      renderHistory();
-      renderImageGallery();
-
-      // Check connections
-      await checkOllamaStatus();
-      await checkApiStatus();
-      await fetchModels();
-
-      // Periodic status check
-      setInterval(async () => {
-        await checkOllamaStatus();
-        await checkApiStatus();
-      }, 30000);
-
-      console.log('%c🧠 Atena Evolução inicializada', 'color: #8b5cf6; font-size: 14px; font-weight: bold;');
+    .loading-overlay.active {
+        display: flex;
     }
 
-    // Security: sanitize HTML to prevent XSS
-    function sanitizeHTML(str) {
-      if (!str) return '';
-      return str.replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#x27;');
+    .loading-content {
+        text-align: center;
     }
 
-    // Security: escape for safe innerHTML usage
-    function escapeHTML(str) {
-      const div = document.createElement('div');
-      div.textContent = str;
-      return div.innerHTML;
+    .loading-spinner {
+        width: 60px;
+        height: 60px;
+        border: 3px solid rgba(0, 240, 255, 0.2);
+        border-top-color: var(--cyan);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 16px;
     }
 
-    // Start
-    init();
+    .loading-text {
+        font-family: 'Orbitron', sans-serif;
+        color: var(--cyan);
+        font-size: 1rem;
+        letter-spacing: 2px;
+        animation: pulse 1.5s ease-in-out infinite;
+    }
 
-  })();
-  </script>
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
 
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    /* ============================================
+       TYPING INDICATOR
+       ============================================ */
+    .typing-indicator {
+        display: none;
+        position: fixed;
+        bottom: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--bg-panel);
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        border-radius: 20px;
+        padding: 8px 16px;
+        z-index: 100;
+    }
+
+    .typing-indicator.active {
+        display: flex;
+        gap: 4px;
+    }
+
+    .typing-dot {
+        width: 8px;
+        height: 8px;
+        background: var(--cyan);
+        border-radius: 50%;
+        animation: typingBounce 1.4s ease-in-out infinite;
+    }
+
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typingBounce {
+        0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+        30% { transform: translateY(-8px); opacity: 1; }
+    }
+
+    /* ============================================
+       SELETOR CYBERPUNK
+       ============================================ */
+    .cyber-select {
+        width: 100%;
+        padding: 8px 12px;
+        background: var(--bg-glass);
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        border-radius: 4px;
+        color: var(--text-primary);
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.9rem;
+        cursor: pointer;
+        outline: none;
+        transition: all 0.3s;
+    }
+
+    .cyber-select:focus {
+        border-color: var(--cyan);
+        box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    }
+
+    .cyber-select option {
+        background: var(--bg-dark);
+        color: var(--text-primary);
+    }
+
+    .cyber-btn-small {
+        padding: 6px 12px;
+        background: rgba(255, 0, 255, 0.1);
+        border: 1px solid rgba(255, 0, 255, 0.3);
+        border-radius: 4px;
+        color: var(--magenta);
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .cyber-btn-small:hover {
+        background: rgba(255, 0, 255, 0.2);
+        box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+    }
+    (function initStatusUpdates() {
+        function updateStatus() {
+            // RAM
+            const ram = Math.floor(Math.random() * 30 + 55);
+            document.getElementById('ram-usage').textContent = ram + '%';
+            document.querySelector('.progress-bar').querySelector('.progress-fill').style.width = ram + '%';
+
+            // Tokens
+            const tokens = Math.floor(Math.random() * 100 + 80);
+            document.getElementById('token-count').textContent = tokens;
+            document.querySelectorAll('.progress-bar')[1].querySelector('.progress-fill').style.width = (tokens / 2) + '%';
+
+            // Velocidade
+            const speed = Math.floor(Math.random() * 10 + 8);
+            document.getElementById('response-time').textContent = speed + 'ms';
+
+            // Modelo ocasionalmente muda
+            if (Math.random() < 0.1) {
+                const modelos = ['Atena-V7', 'Atena-V7.2', 'Atena-Pro', 'Atena-Max'];
+                document.getElementById('model-name').textContent = modelos[Math.floor(Math.random() * modelos.length)];
+            }
+        }
+
+        // Atualizar a cada 3 segundos
+        setInterval(updateStatus, 3000);
+    })();
+
+    /* ============================================
+       LOADING OVERLAY
+       ============================================ */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(10, 10, 15, 0.85);
+        backdrop-filter: blur(10px);
+        z-index: 10000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .loading-overlay.active {
+        display: flex;
+    }
+
+    .loading-content {
+        text-align: center;
+    }
+
+    .loading-spinner {
+        width: 60px;
+        height: 60px;
+        border: 3px solid rgba(0, 240, 255, 0.2);
+        border-top-color: var(--cyan);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 16px;
+    }
+
+    .loading-text {
+        font-family: 'Orbitron', sans-serif;
+        color: var(--cyan);
+        font-size: 1rem;
+        letter-spacing: 2px;
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    /* ============================================
+       TYPING INDICATOR
+       ============================================ */
+    .typing-indicator {
+        display: none;
+        position: fixed;
+        bottom: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--bg-panel);
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        border-radius: 20px;
+        padding: 8px 16px;
+        z-index: 100;
+    }
+
+    .typing-indicator.active {
+        display: flex;
+        gap: 4px;
+    }
+
+    .typing-dot {
+        width: 8px;
+        height: 8px;
+        background: var(--cyan);
+        border-radius: 50%;
+        animation: typingBounce 1.4s ease-in-out infinite;
+    }
+
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typingBounce {
+        0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+        30% { transform: translateY(-8px); opacity: 1; }
+    }
+
+    /* ============================================
+       SELETOR CYBERPUNK
+       ============================================ */
+    .cyber-select {
+        width: 100%;
+        padding: 8px 12px;
+        background: var(--bg-glass);
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        border-radius: 4px;
+        color: var(--text-primary);
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.9rem;
+        cursor: pointer;
+        outline: none;
+        transition: all 0.3s;
+    }
+
+    .cyber-select:focus {
+        border-color: var(--cyan);
+        box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    }
+
+    .cyber-select option {
+        background: var(--bg-dark);
+        color: var(--text-primary);
+    }
+
+    .cyber-btn-small {
+        padding: 6px 12px;
+        background: rgba(255, 0, 255, 0.1);
+        border: 1px solid rgba(255, 0, 255, 0.3);
+        border-radius: 4px;
+        color: var(--magenta);
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .cyber-btn-small:hover {
+        background: rgba(255, 0, 255, 0.2);
+        box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+    }
+    (function initParticles() {
+        const container = document.createElement('div');
+        container.className = 'particles-container';
+        document.body.appendChild(container);
+
+        for (let i = 0; i < 30; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDuration = (Math.random() * 15 + 10) + 's';
+            particle.style.animationDelay = (Math.random() * 10) + 's';
+            
+            const colors = ['var(--cyan)', 'var(--magenta)', 'var(--purple)'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            particle.style.background = color;
+            particle.style.boxShadow = `0 0 6px ${color}`;
+            
+            container.appendChild(particle);
+        }
+    })();
+    </script>
 </body>
 </html>
