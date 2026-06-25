@@ -1,0 +1,85 @@
+# ===================================================
+# ARQUIVO DE DEPENDÊNCIAS DO ECOSSISTEMA ATENA (REVISADO E CORRIGIDO)
+# Versão: 2.5 - Adicionado XGBoost
+# Data: 10 de Julho de 2025
+# ===================================================
+
+# --- Core Frameworks ---
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+pydantic
+pydantic-settings
+python-dotenv
+aiofiles
+python-multipart
+
+# --- Core de IA (PyTorch e ecossistema) ---
+torch
+torchaudio
+torchvision
+transformers
+sentence-transformers
+tokenizers
+diffusers
+
+# --- NLP e Processamento de Texto ---
+spacy
+textstat
+nltk
+yake
+textblob
+text-unidecode
+bertopic
+xgboost
+
+# --- Banco de Dados e Cache ---
+sqlalchemy[asyncio]
+psycopg2-binary
+asyncpg
+qdrant-client
+faiss-cpu
+redis[hiredis]
+chromadb
+
+# --- Conflito Resolvido: Pandas e NetworkX ---
+pandas
+networkx
+
+# --- LangChain (compatível com pydantic 2.7.1) ---
+langchain
+langchain-community
+openai # Adicionado para OpenAIEmbeddings (placeholder)
+langchain-google-genai # Adicionado para GoogleGenerativeAIEmbeddings
+llama-cpp-python # Adicionado para suporte a LLMs locais via Llama.cpp
+
+# --- Automação e Visão ---
+playwright
+pyautogui
+Pillow
+opencv-python-headless
+beautifulsoup4
+
+# --- Google APIs ---
+google-generativeai
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib
+
+# --- Voz e Áudio ---
+# Mecanismo de voz removido a pedido do usuário
+
+# --- Outros Utilitários ---
+httpx
+requests
+cryptography
+python-jose[cryptography]
+pyyaml
+packaging
+ollama
+schedule
+praat-parselmouth
+stopit
+
+torch
+soundfile
+tensorflow

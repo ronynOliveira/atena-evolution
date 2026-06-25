@@ -1,0 +1,49 @@
+2025-10-04 13:23:08,410 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-10-04 13:23:08,488 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-10-04 13:23:26,056 - app.atena_sistema_cognitivo - ERROR - Erro ao importar módulos principais da Atena: No module named 'atena_cognitive_architecture'
+2025-10-04 13:23:26,056 - root - ERROR - FALHA ao carregar 'google_drive_agent': No module named 'google_drive_agent'
+2025-10-04 13:23:26,800 - root - INFO - --- Iniciando teste de importação do servidor Atena ---
+2025-10-04 13:23:26,800 - root - ERROR - FALHA: Ocorreu um erro ao tentar importar 'atena_servidor_unified'.
+2025-10-04 13:23:26,800 - root - ERROR - A causa raiz provável está detalhada no traceback abaixo.
+2025-10-04 13:36:21,802 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-10-04 13:36:21,834 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-10-04 13:36:41,399 - app.atena_sistema_cognitivo - ERROR - Erro ao importar módulos principais da Atena: No module named 'atena_cognitive_architecture'
+2025-10-04 13:36:41,399 - root - ERROR - FALHA ao carregar 'google_drive_agent': No module named 'google_drive_agent'
+2025-10-04 13:36:42,304 - root - INFO - --- Iniciando teste de importação do servidor Atena ---
+2025-10-04 13:36:42,304 - root - ERROR - FALHA: Ocorreu um erro ao tentar importar 'atena_servidor_unified'.
+2025-10-04 13:36:42,304 - root - ERROR - A causa raiz provável está detalhada no traceback abaixo.
+2025-10-04 13:45:59,029 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-10-04 13:45:59,074 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-10-04 13:46:26,256 - app.atena_sistema_cognitivo - ERROR - Erro ao importar módulos principais da Atena: No module named 'atena_cognitive_architecture'
+2025-10-04 13:46:26,256 - root - ERROR - FALHA ao carregar 'google_drive_agent': No module named 'google_drive_agent'
+2025-10-04 13:46:27,591 - root - INFO - --- Iniciando teste de importação do servidor Atena ---
+2025-10-04 13:46:27,591 - root - ERROR - FALHA: Ocorreu um erro ao tentar importar 'atena_servidor_unified'.
+2025-10-04 13:46:27,593 - root - ERROR - A causa raiz provável está detalhada no traceback abaixo.
+2025-10-04 13:52:03,070 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-10-04 13:52:03,117 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-10-04 13:52:43,087 - app.atena_sistema_cognitivo - ERROR - Erro ao importar módulos principais da Atena: No module named 'atena_cognitive_architecture'
+2025-10-04 13:52:43,087 - root - ERROR - FALHA ao carregar 'google_drive_agent': No module named 'google_drive_agent'
+2025-10-04 13:52:45,058 - root - INFO - --- Iniciando teste de importação do servidor Atena ---
+2025-10-04 13:52:45,058 - root - ERROR - FALHA: Ocorreu um erro ao tentar importar 'atena_servidor_unified'.
+2025-10-04 13:52:45,058 - root - ERROR - A causa raiz provável está detalhada no traceback abaixo.
+2025-10-04 13:59:19,365 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-10-04 13:59:19,412 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-10-04 13:59:53,573 - app.atena_sistema_cognitivo - ERROR - Erro ao importar módulos principais da Atena: No module named 'atena_cognitive_architecture'
+2025-10-04 13:59:53,573 - root - ERROR - FALHA ao carregar 'google_drive_agent': No module named 'google_drive_agent'
+2025-10-04 13:59:55,473 - root - INFO - --- Iniciando teste de importação do servidor Atena ---
+2025-10-04 13:59:55,481 - root - ERROR - FALHA: Ocorreu um erro ao tentar importar 'atena_servidor_unified'.
+2025-10-04 13:59:55,483 - root - ERROR - A causa raiz provável está detalhada no traceback abaixo.
+2025-10-04 14:07:08,094 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-10-04 14:07:08,125 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-10-04 14:07:22,659 - app.atena_sistema_cognitivo - ERROR - Erro ao importar módulos principais da Atena: No module named 'atena_cognitive_architecture'
+2025-10-04 14:07:22,675 - root - ERROR - FALHA ao carregar 'google_drive_agent': No module named 'google_drive_agent'
+2025-10-04 14:07:23,641 - root - INFO - --- Iniciando teste de importação do servidor Atena ---
+2025-10-04 14:07:23,641 - root - ERROR - FALHA: Ocorreu um erro ao tentar importar 'atena_servidor_unified'.
+2025-10-04 14:07:23,641 - root - ERROR - A causa raiz provável está detalhada no traceback abaixo.
+2025-10-04 14:15:15,144 - faiss.loader - INFO - Loading faiss with AVX2 support.
+2025-10-04 14:15:15,204 - faiss.loader - INFO - Successfully loaded faiss with AVX2 support.
+2025-10-04 14:15:39,163 - app.atena_sistema_cognitivo - ERROR - Erro ao importar módulos principais da Atena: No module named 'atena_cognitive_architecture'
+2025-10-04 14:15:39,165 - root - ERROR - FALHA ao carregar 'google_drive_agent': No module named 'google_drive_agent'
+2025-10-04 14:15:40,366 - root - INFO - --- Iniciando teste de importação do servidor Atena ---
+2025-10-04 14:15:40,366 - root - ERROR - FALHA: Ocorreu um erro ao tentar importar 'atena_servidor_unified'.
+2025-10-04 14:15:40,366 - root - ERROR - A causa raiz provável está detalhada no traceback abaixo.

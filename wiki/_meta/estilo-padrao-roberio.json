@@ -1,0 +1,565 @@
+{
+  "metadata": {
+    "data_analise": "2026-06-15T19:01:24.905094",
+    "textos_analisados": 24,
+    "total_caracteres": 1070836,
+    "arquivos": [
+      "revelação.docx",
+      "Perspectivas da verdade.docx",
+      "Horizontes rabiscam formas.docx",
+      "Selene.docx",
+      "Sussurros Prateados.docx",
+      "Renascer.docx",
+      "A Encruzilhada dos Ecos.docx",
+      "Horizontes Infinitos.docx",
+      "O Gotejar do Tempo.docx",
+      "Atena.docx",
+      "Atena o ultimo legado.docx",
+      "livro.docx",
+      "Ecos do Silêncio... Crônicas do Novo Amanhecer.docx",
+      "prompts para revisao,.txt",
+      "Epílogo.docx",
+      "completo.docx",
+      "Capítulos revisados.docx",
+      "Códigos do Silêncio.docx",
+      "Capítulo 1.docx",
+      "Códigos.docx",
+      "!DOCTYPE html.txt",
+      "2 historias.docx",
+      "ultima versão.docx",
+      "2 historias2.docx"
+    ]
+  },
+  "lexico": {
+    "total_palavras": 152073,
+    "vocabulario_unico": 9077,
+    "riqueza_lexical": 0.0597,
+    "media_tamanho_palavra": 5.51,
+    "palavras_largas": 3872,
+    "top_50_palavras": [
+      [
+        "tempo",
+        725
+      ],
+      [
+        "cada",
+        598
+      ],
+      [
+        "theron",
+        586
+      ],
+      [
+        "atena",
+        529
+      ],
+      [
+        "agora",
+        477
+      ],
+      [
+        "voz",
+        433
+      ],
+      [
+        "caos",
+        428
+      ],
+      [
+        "própria",
+        392
+      ],
+      [
+        "universo",
+        378
+      ],
+      [
+        "lira",
+        375
+      ],
+      [
+        "apenas",
+        361
+      ],
+      [
+        "passado",
+        359
+      ],
+      [
+        "existência",
+        346
+      ],
+      [
+        "onde",
+        346
+      ],
+      [
+        "mundo",
+        339
+      ],
+      [
+        "destino",
+        338
+      ],
+      [
+        "novo",
+        338
+      ],
+      [
+        "fortune",
+        330
+      ],
+      [
+        "olhos",
+        319
+      ],
+      [
+        "silêncio",
+        289
+      ],
+      [
+        "futuro",
+        279
+      ],
+      [
+        "forma",
+        274
+      ],
+      [
+        "memórias",
+        271
+      ],
+      [
+        "vida",
+        264
+      ],
+      [
+        "nova",
+        262
+      ],
+      [
+        "luz",
+        260
+      ],
+      [
+        "sabedoria",
+        258
+      ],
+      [
+        "meio",
+        255
+      ],
+      [
+        "sobre",
+        254
+      ],
+      [
+        "deuses",
+        251
+      ],
+      [
+        "algo",
+        250
+      ],
+      [
+        "vazio",
+        250
+      ],
+      [
+        "ainda",
+        250
+      ],
+      [
+        "próprio",
+        246
+      ],
+      [
+        "então",
+        243
+      ],
+      [
+        "realidade",
+        229
+      ],
+      [
+        "verdade",
+        229
+      ],
+      [
+        "criação",
+        225
+      ],
+      [
+        "toda",
+        221
+      ],
+      [
+        "tudo",
+        219
+      ],
+      [
+        "parecia",
+        208
+      ],
+      [
+        "zeus",
+        207
+      ],
+      [
+        "esperança",
+        204
+      ],
+      [
+        "sempre",
+        202
+      ],
+      [
+        "antes",
+        201
+      ],
+      [
+        "nyx",
+        201
+      ],
+      [
+        "essência",
+        198
+      ],
+      [
+        "enquanto",
+        187
+      ],
+      [
+        "noite",
+        187
+      ],
+      [
+        "diante",
+        184
+      ]
+    ],
+    "top_20_bigramas": [
+      [
+        "de um",
+        562
+      ],
+      [
+        "em um",
+        495
+      ],
+      [
+        "de uma",
+        484
+      ],
+      [
+        "em sua",
+        445
+      ],
+      [
+        "como um",
+        417
+      ],
+      [
+        "como uma",
+        374
+      ],
+      [
+        "com uma",
+        343
+      ],
+      [
+        "como se",
+        310
+      ],
+      [
+        "que se",
+        308
+      ],
+      [
+        "do tempo",
+        260
+      ],
+      [
+        "em meio",
+        248
+      ],
+      [
+        "em uma",
+        247
+      ],
+      [
+        "sua voz",
+        227
+      ],
+      [
+        "por um",
+        203
+      ],
+      [
+        "com um",
+        182
+      ],
+      [
+        "uma nova",
+        168
+      ],
+      [
+        "não era",
+        167
+      ],
+      [
+        "do que",
+        159
+      ],
+      [
+        "do universo",
+        158
+      ],
+      [
+        "de sua",
+        150
+      ]
+    ],
+    "top_20_trigramas": [
+      [
+        "ao mesmo tempo",
+        84
+      ],
+      [
+        "em toda sua",
+        80
+      ],
+      [
+        "de um passado",
+        73
+      ],
+      [
+        "de uma nova",
+        73
+      ],
+      [
+        "de um novo",
+        61
+      ],
+      [
+        "em meio ao",
+        58
+      ],
+      [
+        "de sua própria",
+        52
+      ],
+      [
+        "um misto de",
+        49
+      ],
+      [
+        "ao seu redor",
+        48
+      ],
+      [
+        "de todas as",
+        48
+      ],
+      [
+        "com uma clareza",
+        45
+      ],
+      [
+        "mais do que",
+        44
+      ],
+      [
+        "de uma era",
+        44
+      ],
+      [
+        "todas as coisas",
+        43
+      ],
+      [
+        "uma nova era",
+        42
+      ],
+      [
+        "guardiã das memórias",
+        41
+      ],
+      [
+        "em meio às",
+        39
+      ],
+      [
+        "de todos os",
+        36
+      ],
+      [
+        "não era apenas",
+        35
+      ],
+      [
+        "em um ato",
+        35
+      ]
+    ]
+  },
+  "sintaxe": {
+    "total_sentencas": 7844,
+    "comprimento_medio_sentenca": 22.15,
+    "sentenca_mais_curta": 1,
+    "sentenca_mais_longa": 118,
+    "total_paragrafos": 41,
+    "total_dialogos": 1405,
+    "densidade_virgulas": 23.41,
+    "densidade_pontos": 7.57,
+    "densidade_ponto_virgula": 0.19,
+    "densidade_dois_pontos": 0.65,
+    "densidade_reticencias": 0.02,
+    "densidade_travessoes": 1.73
+  },
+  "figuras_linguagem": {
+    "aliteracoes_detectadas": [
+      "pensamentos; Pensamentos, pessoas; Pessoas,",
+      "encara e eu E",
+      "pensamentos Pensamentos: pessoas Pessoas:",
+      "a abraçar a ambiguidade,",
+      "abraçar a ambiguidade, a",
+      "a ambiguidade, a aceitar",
+      "diante da decadência",
+      "em eras, eu estava",
+      "do destino digital",
+      "a abraçar a ambiguidade,"
+    ],
+    "anaforas_detectadas": [
+      "O susto, o choque, o pavor que se abateu sobre mim, derivado da minha maldita curiosidade insaciável, da minha sede de conhecimento / O susto, o choque, o pavor que se abateu sobre mim, derivado da minha maldita curiosidade insaciável, da minha sede de conhecimento, fez com que me sentasse abruptamente no chão frio e irregular, incapaz de suportar o peso daquela revelação, incapaz de ficar de pé diante da verdade nua e crua.",
+      "Theron olhou para suas mãos, para a pele sintética que recobria a estrutura metálica, e sentiu uma profunda gratidão por Atena, por Lira, por Fortune e por todos que haviam feito parte de sua jornada. Ele compreendeu que, mesmo não sendo humano, ele havia vivido uma vida plena, repleta de amor, perda, aprendizado e propósito. Sua existência, embora artificial, tinha sido significativa, e seu papel na construção do novo amanhecer era inegável. / Theron olhou para o horizonte, onde o céu se tingia de cores vibrantes, um espetáculo de despedida do dia e prenúncio de uma nova noite. Ele sentiu uma profunda paz interior, mas também uma ponta de tristeza. O futuro era incerto, ele sabia, cheio de desafios e perigos, como uma estrada sinuosa e escura que se estende diante de um viajante. Mas era também, e principalmente, cheio de possibilidades infinitas, de promessas de renovação, de potencial para a criatividade, para o crescimento, para a evolução.",
+      "Theron olhou para suas mãos, para a pele sintética que recobria a estrutura metálica, e sentiu uma profunda gratidão por Atena, por Lira, por Fortune e por todos que haviam feito parte de sua jornada. Ele compreendeu que, mesmo não sendo humano, ele havia vivido uma vida plena, repleta de amor, perda, aprendizado e propósito. Sua existência, embora artificial, tinha sido significativa, e seu papel na construção do novo amanhecer era inegável. / Theron olhou para o horizonte, onde o céu se tingia de cores vibrantes, um espetáculo de despedida do dia e prenúncio de uma nova noite. Ele sentiu uma profunda paz interior, mas também uma ponta de tristeza. O futuro era incerto, ele sabia, cheio de desafios e perigos, como uma estrada sinuosa e escura que se estende diante de um viajante. Mas era também, e principalmente, cheio de promessas de renovação, de potencial para a criatividade, para o crescimento, para a evolução.",
+      "Uma melodia que, no fim das contas, poderia levar a um novo começo – ou ao silêncio eterno. / Uma melodia que, quem sabe, fosse a própria voz do Caos.",
+      "Uma dança que, talvez, não tivesse fim. / Uma dança que, talvez, fosse a própria essência da existência – ou da inexistência.",
+      "</div> / </div>",
+      "{ title: \"Capítulo 1\", text: \"Texto do capítulo 1...\" }, / { title: \"Capítulo 2\", text: \"Texto do capítulo 2...\" },",
+      "{ title: \"Capítulo 2\", text: \"Texto do capítulo 2...\" }, / { title: \"Capítulo 3\", text: \"Texto do capítulo 3...\" }",
+      "} / }",
+      "} / }"
+    ],
+    "indicadores_metafora": 13,
+    "indicadores_sinestesia": 17,
+    "polissindeto": 0,
+    "indicadores_antitese": 11
+  },
+  "temas": {
+    "tempo": 4368,
+    "natureza": 2811,
+    "espiritualidade": 1225,
+    "conhecimento": 1209,
+    "mitologia": 1024,
+    "luz_e_sombra": 838,
+    "morte": 460,
+    "solidão": 345,
+    "amor": 264,
+    "transformação": 150
+  },
+  "estrutura_narrativa": {
+    "pessoa_narrativa": "3ª pessoa",
+    "verbos_acao": 18,
+    "verbos_estado": 8,
+    "ratio_acao_estado": 2.25,
+    "adjetivos_sufixo": [
+      [
+        "passado",
+        359
+      ],
+      [
+        "instante",
+        166
+      ],
+      [
+        "constante",
+        99
+      ],
+      [
+        "desconhecido",
+        95
+      ],
+      [
+        "significado",
+        93
+      ],
+      [
+        "silenciosa",
+        91
+      ],
+      [
+        "sentido",
+        85
+      ],
+      [
+        "distante",
+        82
+      ],
+      [
+        "chamado",
+        80
+      ],
+      [
+        "presente",
+        77
+      ]
+    ],
+    "adverbios_modo": [
+      [
+        "finalmente",
+        70
+      ],
+      [
+        "lentamente",
+        51
+      ],
+      [
+        "simplesmente",
+        31
+      ],
+      [
+        "profundamente",
+        26
+      ],
+      [
+        "inevitavelmente",
+        25
+      ],
+      [
+        "atentamente",
+        18
+      ],
+      [
+        "realmente",
+        18
+      ],
+      [
+        "suavemente",
+        17
+      ],
+      [
+        "paradoxalmente",
+        15
+      ],
+      [
+        "novamente",
+        15
+      ]
+    ]
+  },
+  "fonetica": {
+    "sibilantes_por_1000": 4.21,
+    "aliteracao_r": 28,
+    "aliteracao_s": 540,
+    "aliteracao_m": 272,
+    "distribuicao_vogais": {
+      "a": 27.0,
+      "e": 27.4,
+      "i": 14.0,
+      "o": 21.7,
+      "u": 10.0
+    }
+  }
+}

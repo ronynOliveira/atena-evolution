@@ -1,0 +1,441 @@
+================================================================================
+                    RELATORIO COMPLETO - ATENA EVOLUCAO
+================================================================================
+Data: 19/06/2026
+Autor: Koldi (OWL) - Agente de IA do Projeto Atena
+Repositorio: https://github.com/ronynOliveira/atena-evolution
+
+================================================================================
+0. NOTA DE HONESTIDADE
+================================================================================
+
+Este relatorio foi reescrito em 19/06/2026 para corrigir erros da versao
+anterior. Os numeros abaixo foram verificados com comandos reais, nao
+reconstruidos de memoria.
+
+ERROS CORRIGIDOS DA VERSAO ANTERIOR:
+- Testes: era "61", real e 61 (confirmado via pytest)
+- Commits: era "33", real e 34
+- Arquivos Python: era "44", real e 46
+- Linhas de codigo: era "15.535", real e 15.749
+- IP da VPS foi removido (risco de seguranca)
+- Secao DSA/HISA/MISA foi corrigida (tecnicas nao se aplicam ao phi4-mini)
+- Schema do store.py foi corrigido para bater com o codigo real
+
+================================================================================
+1. VISAO GERAL DO PROJETO
+================================================================================
+
+Atena Evolucao e um sistema de IA cognitivo 100% local, projetado para rodar
+em hardware modesto (Intel i5-1235U, 15.7GB RAM, sem GPU dedicada) usando
+Ollama como motor de inferencia.
+
+OBJETIVO PRINCIPAL:
+  Criar um agente de IA que seja extensao da mente do usuario (Senhor Roberio),
+  capaz de lembrar, aprender, criar e ajudar de forma proativa - sem depender
+  de APIs externas pagas.
+
+DIFERENCIAL:
+  - 100% local (Ollama + Python + SQLite)
+  - Custo ZERO de API
+  - Privacidade total (nada sai da maquina)
+  - Memoria de longo prazo com decay inteligente
+  - Sistema de skills plugavel
+  - UI web integrada
+  - Seguranca em 7 camadas
+
+================================================================================
+2. ARQUITETURA DO SISTEMA
+================================================================================
+
+2.1 DIRETORIO E ESTRUTURA (verificado em 19/06/2026)
+-------------------------------------------------
+
+atena_evolution/
+  core/                  # Nucleo do sistema (9 arquivos)
+    ai_broker_v3.py      # Broker de IA com multi-providers
+    atena_api.py         # API REST (FastAPI)
+    atena_behavior.py    # System Prompt Hierarquico + Constitutional AI
+    atena_bridge.py      # Ponte direta Koldi <-> Atena (Ollama)
+    atena_evolution_core.py  # Nucleo legado
+    embedding_cache.py   # Cache SQLite de embeddings
+    hermes_ollama_adapter.py # Proxy OpenAI-format -> Ollama-format
+    orchestrator.py      # KoldiOrchestrator (roteador de tarefas)
+    security_guard.py    # Seguranca em 7 camadas
+
+  lib/memory/            # Sistema de Memoria de Longo Prazo (6 arquivos)
+    store.py             # MemoryStore (SQLite: episodic + semantic)
+    decay.py             # Decay temporal (Ebbinghaus: R = e^(-t/S))
+    retrieval.py         # Cosine similarity + top-k retrieval
+    consolidation.py     # Extracao de entidades + clustering
+    pipeline.py          # AtenaMemory (remember, recall, maintenance)
+    bridge.py            # FakeBridge para testes
+
+  apis/                  # Provedores externos (2 arquivos)
+    image_generator.py   # Geracao de imagens (4 providers, 8 estilos)
+    free_apis.py         # APIs gratuitas (Open-Meteo, etc)
+
+  inference/             # Otimizacao de inferencia (5 arquivos)
+    atena_inference_advanced.py  # Speculative Decoding + KV-Cache
+    glm5_optimizations.py        # Otimizacoes baseadas em GLM-5 paper
+    inference_optimizer.py       # Otimizacoes de performance
+    llm_inference_opt.py         # Inferencia otimizada
+    qwen_inference.py            # Inferencia Qwen
+
+  rag/                   # Retrieval-Augmented Generation (2 arquivos)
+    atena_rag_engine.py  # RAG avancado (HyDE, Fusion, CRAG, Reranking)
+    rag_engine.py        # RAG basico (legado)
+
+  web/                   # Interface web (2 arquivos)
+    index.html           # UI completa (dark mode, animacoes)
+    style.css            # CSS premium (variaveis, responsivo)
+
+  tools/                 # Utilitarios (5 arquivos)
+    serve_ui.py          # Servidor HTTP para UI
+    hermes_auto_update.py # Atualizacao automatica do Hermes
+    push_to_github.py    # Script de push para GitHub
+    apply_security_patches.py # Patches de seguranca
+    sync_c_to_g.py       # Sincronizacao C: -> G:
+    verify_project_metrics.py # Verificacao de metricas
+
+  tests/                 # Suite de testes (9 arquivos)
+    test_atena_memory.py      # Testes TDD do sistema de memoria
+    test_atena_optimizations.py # Testes de otimizacoes
+    test_atena_validacao.py   # Testes de validacao de UI
+    test_pipeline_rapido.py   # Testes do pipeline rapido
+    test_pipeline_unificado.py # Testes do pipeline unificado
+    test_ui_validacao.py      # Testes de estrutura HTML/CSS
+    test_comprehensive.py     # Testes abrangentes
+    test_loop1.py             # Testes de loop
+    test_ai_broker.py         # Tests do broker
+
+  safety/                # Seguranca (1 arquivo)
+    safety_guard.py      # Guard de seguranca legado
+
+  skills/                # Skills do agente (1 arquivo)
+    honestidade_verificavel/ # Skill de governanca anti-confabulacao
+
+  docs/                  # Documentacao (3 arquivos)
+    memory-tdd-plan.md
+    hermes-atena-integracao-2026-06-18.md
+    RELATORIO_COMPLETO.txt
+
+================================================================================
+3. TECNICAS UTILIZADAS
+================================================================================
+
+3.1 MODELO DE IA LOCAL
+----------------------
+
+Modelo principal: atena-glm5 (3.8B parametros, baseado em phi4-mini)
+  - Criado via Ollama com Modelfile customizado
+  - System prompt em portugues com identidade "Atena"
+  - Temperature: 0.85, top_p: 0.92, repeat_penalty: 1.15
+  - Contexto: 8192 tokens (configuravel ate 131072)
+
+Modelos auxiliares no Ollama:
+  - phi4-mini (3.8B) - base para atena-glm5
+  - gemma4:e2b (6.7GB) - tarefas que precisam de mais contexto
+  - gemma4:e4b (8.9GB) - tarefas complexas
+  - qwen3:8b (4.9GB) - alternativa leve
+  - hermes3:8b (4.3GB) - modelo de chat
+  - nomic-embed-text (0.3GB) - embeddings
+  - deepseek-r1:8b (4.9GB) - raciocinio
+
+3.2 SISTEMA DE MEMORIA DE LONGO PRAZO
+-------------------------------------
+
+Tecnica: Arquitetura 3 Camadas (inspirada em A-MEM, MemoryBank, LightMem)
+
+CAMADA 1 - Memoria de Trabalho (Working Memory):
+  - Buffer da sessao atual, em processo
+  - Nao persiste entre sessoes
+  - Implementacao: conversation_history em AtenaBridge
+
+CAMADA 2 - Memoria Episodica (SQLite):
+  - Notas atomicas estilo Zettelkasten / A-MEM
+  - Cada nota: embedding + entidades + importancia + forca S
+  - Decay: R = e^(-t/S) [MemoryBank / Ebbinghaus]
+  - t = dias desde ultimo acesso (nao desde criacao)
+  - S = forca, comeca em 1.0, aumenta a cada recall
+  - Memorias abaixo de threshold (0.05) sao arquivadas (nao destruidas)
+
+CAMADA 3 - Memoria Semantica (Fatos Consolidados):
+  - Clusters de memorias episodicas relacionadas
+  - 1 chamada ao LLM por cluster (nao por memoria individual)
+  - Decai mais devagar (forca inicial mais alta)
+  - Extracao de entidades via regex (nomes proprios + termos de dominio)
+  - Clustering por overlap (union-find, O(n·e))
+
+Tecnicas especificas:
+  - Decay temporal: R = e^(-t/S) com S incrementado a cada recall
+  - Spacing effect: memorias revisitadas resistem mais ao esquecimento
+  - Token budget: retrieve_top_k() com limite de 400 tokens
+  - Manutencao offline: 1x/dia (decay + arquivamento + consolidacao)
+
+3.3 COMPORTAMENTO DO AGENTE
+---------------------------
+
+3.3.1 System Prompt Hierarquico (6 camadas):
+  - Camada 0: Protocolo Fundacional (imutavel)
+  - Camada 1: Identidade (imutavel)
+  - Camada 2: Seguranca e Limites (imutavel)
+  - Camada 3: Competencia e Estilo (mutavel)
+  - Camada 4: Contexto de Sessao (mutavel)
+  - Camada 5: Instrucao Imediata (mutavel)
+
+3.3.2 Classificador de Tarefas (classify_task_v2):
+  - 5 tipos: criativo, analitico, tecnico, factual, geral
+  - Keywords expandidas por tipo
+  - Temperatura adaptativa por tipo:
+    * criativo: 0.9
+    * analitico: 0.5
+    * tecnico: 0.3
+    * factual: 0.2
+    * geral: 0.7
+
+3.3.3 Constitutional AI:
+  - Auto-critica apos cada resposta
+  - Deteccao de incerteza, respostas curtas, ingles
+  - Retry com prompt corrigido se issues encontradas
+
+3.4 RAG (RETRIEVAL-AUGMENTED GENERATION)
+-----------------------------------------
+
+Tecnicas implementadas:
+  - Chunking Semantico Adaptativo (256-512 tokens, overlap 15%)
+  - Reranking via LLM (gemma4:e2b)
+  - HyDE (Hypothetical Document Embeddings)
+  - RAG Fusion (Multi-Query + Reciprocal Rank Fusion)
+  - CRAG (Corrective RAG com avaliacao de relevancia)
+  - Embeddings: nomic-embed-text via Ollama
+  - Cache SQLite de embeddings
+
+3.5 GERACAO DE IMAGENS
+----------------------
+
+Multi-provedor com fallback:
+  1. OpenAI DALL-E 3 (API key)
+  2. Gemini Imagen (API key)
+  3. Stable Diffusion via ComfyUI (local)
+  4. Placeholder (picsum.photos) - sempre disponivel
+
+8 estilos pre-definidos com templates de prompt:
+  realistic, artistic, cartoon, anime, watercolor, oil_painting,
+  digital_art, minimalist
+
+3.6 SEGURANCA
+-------------
+
+7 camadas de protecao:
+  1. Input Sanitizacao (prompt injection, path traversal, command injection)
+  2. Output Validacao (vazamento de dados, alucinacoes)
+  3. Rate Limiting (token bucket, 30/min)
+  4. Audit Log (SQLite com hash, timestamp, latencia)
+  5. Model Integrity (checksum SHA-256 dos modelos)
+  6. Secure Context (limpeza periodica, limite de tamanho)
+  7. Anomaly Detection (7 detectores)
+
+Medidas adicionais:
+  - Content Security Policy (CSP)
+  - Funcoes sanitizeHTML() e escapeHTML()
+  - HTTPException sem str(e)
+  - Validacao de max_length em Pydantic models
+
+3.7 OTIMIZACAO DE INFERENCIA
+-----------------------------
+
+  - Speculative Decoding (phi4-mini draft + atena-glm5 target)
+  - KV-Cache Manager (LRU eviction, compressao)
+  - Flash Attention Wrapper (3-tier fallback)
+  - Embedding Cache (SQLite)
+  - WAL mode no SQLite (concorrencia)
+
+NOTA: O arquivo glm5_optimizations.py contem referencias a DSA/HISA/MISA
+que sao tecnicas do modelo GLM-5 real (745B). O atena-glm5 e baseado em
+phi4-mini (3.8B) que nao usa essas arquiteturas. O arquivo existe mas
+essas otimizacoes nao sao aplicaveis ao modelo atual. Isso foi um erro
+de associacao corrigido.
+
+================================================================================
+4. HARDWARE E CONFIGURACAO
+================================================================================
+
+Maquina local:
+  - CPU: Intel i5-1235U (10 cores, 12 threads)
+  - RAM: 15.7GB
+  - GPU: Intel Iris Xe (sem GPU dedicada)
+  - SO: Windows 10
+  - Python: 3.11.9
+  - Ollama: v0.16.0
+
+VPS (Koldi da Nuvem):
+  - Hostinger srv1729328
+  - RAM: 3.8GB
+  - CPU: 1 core
+  - Disco: 48GB
+  - SO: Debian
+  - Hermes Gateway: rodando (systemd)
+
+================================================================================
+5. COMO COLOCAR O AGENTE HERMES NO NUCLEO DE UM LLM 4B+2B
+================================================================================
+
+5.1 PROBLEMA
+------------
+
+O modelo atena-glm5 (3.8B) precisa de:
+  - ~2.3GB RAM (modelo) + ~1GB (Ollama overhead)
+  - System prompt: ~2000 tokens
+  - Memoria + RAG: variavel (ate 4000 tokens)
+
+Em 3.8GB RAM (VPS), nao ha espaco suficiente para Ollama + modelo 4B +
+Hermes Gateway + SO simultaneamente.
+
+Em 15.7GB RAM (local), ha espaco com folga.
+
+5.2 SOLUCOES POSSIVEIS
+----------------------
+
+SOLUCAO A: Modelo Menor (2B) na VPS
+  - Usar qwen3:2b (1.2GB)
+  - System prompt reduzido (500 tokens)
+  - Memoria via RAG apenas
+  - Vantagem: cabe em 3.8GB
+  - Desvantagem: qualidade inferior
+
+SOLUCAO B: Modelo 4B Local + Relay na VPS
+  - Modelo 4B roda no Windows (15.7GB)
+  - VPS serve apenas como relay/messaging
+  - Vantagem: qualidade maxima
+  - Desvantagem: depende do Windows estar ligado
+
+SOLUCAO C: Quantizacao Extrema (Q2_K)
+  - Quantizar modelo 4B para Q2_K (~1.5GB)
+  - Perda de qualidade significativa
+  - Vantagem: roda na VPS
+  - Desvantagem: qualidade muito inferior
+
+SOLUCAO D: Arquitetura Hibrida (RECOMENDADA)
+  - VPS: modelo 2B (1.2GB) para tarefas simples
+  - Local: modelo 4B (2.3GB) para tarefas complexas
+  - Sincronizacao via EPR Bridge (WebSocket)
+  - Vantagem: equilibrio entre qualidade e disponibilidade
+  - Desvantagem: complexidade de sincronizacao
+
+5.3 TECNICAS DE OTIMIZACAO DE CONTEXTO
+--------------------------------------
+
+1. System Prompt Dinamico: carregar apenas skills relevantes (200-500 tokens)
+2. Memoria Seletiva: retrieve_top_k com token_budget=400
+3. Compressao de Historico: resumos de conversas antigas
+4. Lazy Loading de Skills: carregar sob demanda
+5. Prompt Caching: cache de prompts frequentes no Ollama
+
+================================================================================
+6. ESTATISTICAS DO PROJETO (verificadas em 19/06/2026)
+================================================================================
+
+  Arquivos Python:        46 (verificado: find . -name "*.py" | wc -l)
+  Linhas de codigo:       15.749 (verificado: wc -l em cada arquivo)
+  Commits:                34 (verificado: git log --oneline | wc -l)
+  Testes memoria:         61 (verificado: pytest tests/test_atena_memory.py -q)
+  Relatorios:             8+
+  Modelos Ollama:         10
+  Skills propostas:       5
+
+================================================================================
+7. ESTRUTURA DE DADOS REAL (verificada em store.py)
+================================================================================
+
+7.1 SQLite - Episodic Memory:
+  CREATE TABLE episodic_memory (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    content TEXT NOT NULL,
+    embedding TEXT NOT NULL,
+    entities TEXT,
+    importance REAL DEFAULT 0.5,
+    strength REAL DEFAULT 1.0,
+    session_id TEXT,
+    created_at REAL,
+    last_accessed_at REAL,
+    access_count INTEGER DEFAULT 0,
+    promoted_to_semantic INTEGER DEFAULT 0,
+    archived INTEGER DEFAULT 0
+  );
+
+7.2 SQLite - Semantic Memory:
+  CREATE TABLE semantic_memory (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    fact TEXT NOT NULL,
+    source_ids TEXT,
+    strength REAL DEFAULT 2.0,
+    created_at REAL,
+    superseded_by INTEGER
+  );
+
+7.3 SQLite - Embedding Cache:
+  CREATE TABLE embeddings (
+    text_hash TEXT PRIMARY KEY,
+    text_preview TEXT,
+    model TEXT,
+    embedding TEXT,
+    created_at REAL,
+    hit_count INTEGER DEFAULT 0
+  );
+
+================================================================================
+8. PROXIMOS PASSOS
+================================================================================
+
+8.1 Curto Prazo (1-2 semanas):
+  - [ ] Auditoria manual de tudo que o relatorio afirma
+  - [ ] Instalar Ollama na VPS com modelo 2B
+  - [ ] Implementar Hermes Adapter (proxy OpenAI -> Ollama)
+  - [ ] Criar 5 skills propostas
+  - [ ] Integrar sistema de memoria com orchestrator
+
+8.2 Medio Prazo (1 mes):
+  - [ ] Fine-tuning QLoRA com contos do Senhor Roberio
+  - [ ] Implementar speculative decoding em producao
+  - [ ] Monitoramento de qualidade de memoria
+
+================================================================================
+9. REFERENCIAS TECNICAS
+================================================================================
+
+  A-MEM:        Xu et al., arXiv:2502.12110
+  MemoryBank:   Zhong et al. (2024), R = e^(-t/S)
+  LightMem:     arXiv:2604.07798
+  Survey 2026:  arXiv:2603.07670
+  LoCoMo:       Maharana et al., arXiv:2402.17753
+  GLM-5:        arXiv:2602.15763 (DSA/HISA/MISA - modelo 745B, NAO phi4-mini)
+  Hermes Agent: https://hermes-agent.nousresearch.com/docs
+
+================================================================================
+10. ERROS APRENDIDOS
+================================================================================
+
+10.1 Confabulacao de Metricas:
+  - Erro: Reportar "61 testes" sem rodar pytest
+  - Coracao: Sempre rodar pytest --collect-only antes de reportar
+
+10.2 Associacao Errada de Tecnicas:
+  - Erro: Dizer que phi4-mini usa DSA/HISA/MISA
+  - Correcao: Verificar paper original e arquitetura do modelo
+
+10.3 Schema Nao Verificado:
+  - Erro: Documentar "id TEXT PRIMARY KEY" sem ler o codigo
+  - Correcao: Ler o CREATE TABLE real do arquivo
+
+10.4 IP Exposto:
+  - Erro: Incluir IP real da VPS em relatorio
+  - Correcao: Usar placeholder
+
+10.5 Caminhos Absolutos:
+  - Erro: Incluir "C:\Users\dell-" em documentacao
+  - Correcao: Usar caminhos relativos ou placeholders
+
+================================================================================
+                         FIM DO RELATORIO
+================================================================================

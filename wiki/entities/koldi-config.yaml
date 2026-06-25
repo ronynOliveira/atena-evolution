@@ -1,0 +1,516 @@
+# ============================================================================
+# config_padrao_otimizado.yaml
+# ============================================================================
+#Versao: 2.0
+# Data de criacao: 2026-05-27
+# Autor: Gerado por OWL (Hermes Agent - Nous Research)
+# Descricao: Configuracao otimizada completa para o ecossistema Hermes/Koldi.
+# Este arquivo e um MODELO DE REFERENCIA. Copie valores conforme a necessidade
+# e valide as chaves de API antes de usar.
+#
+# COMO USAR:
+#   1. Copie este arquivo para a pasta .hermes/ do usuario.
+#   2. Renomeie para config.yaml (ou use como base para um novo).
+#   3. Preencha as variaveis de ambiente indicadas em "api_key_env".
+#   4. Ajuste os modelos disponiveis conforme sua assinatura/credito.
+# ============================================================================
+
+# ============================================================================
+# 1. MODELOS — PRIMARIO + 3 FALLBACKS EM CASCATA
+# ============================================================================
+# Estrategia: O modelo primario e o mais capaz que voce usa no dia a dia.
+# Os 3 fallbacks sao acionados automaticamente em cadeia quando o anterior
+# falha (rate limit, timeout, erro de provedor, etc.).
+#
+# CASCADE ORDER:
+#   Tier 1 (Primario) : Melhor modelo geral do dia-a-dia.
+#   Tier 2 (Fallback#1): Provedor alternativo, geralmente com limite gratis.
+#   Tier 3 (Fallback#2): Outro provedor, diversificando cobertura de modelos.
+#   Tier 4 (Fallback#3): Serve local (Ollama) — funciona OFFLINE como ultimo recurso
+#                        e garante disponibilidade mesmo sem internet.
+
+model:
+
+  # --- TIER 1: PRIMARIO ---
+  default: google/gemini-2.0-flash        # Balance custo/velocidade/qualidade
+  provider: provider-google                 # Nome do bloco providers (abaixo)
+
+  # --- TIER 2, 3, 4: FALLBACKS EM CASCATA ---
+  # A Hermes tenta nesta ordem. Cada fallback so e usado se TODOS os anteriores falharem.
+  # Ordem pensada:
+  #   OpenRouter = grande variety de modelos com creditos compartilhados
+  #   OpenAI       = robusto, mas pode ter rate limit agressivo em horario de pico
+  #   Ollama       = 100% local, resposta imediata, sem latencia de rede
+  fallback_providers:
+    - model: openrouter/owl-alpha         # Tier 2: Flashy, cost-effective
+      provider: provider-openrouter
+    - model: openai/gpt-4o-mini            # Tier 3: Fallback comercial alternativo
+      provider: provider-openai
+    - model: mistral:latest                # Tier 4: Local, zero latencia, offline-proof
+      provider: provider-ollama
+
+  # --- LOGICA DE RETRY ---
+  api_max_retries: 3                  # 3 tentativas POR antes de ir pro proximo fallback
+  api_retry_backoff: exponential      # exponential | linear | fixed
+  rate_limit_backoff_base: 2          # Espera base em segundos (multiplica exponencialmente)
+  rate_limit_backoff_max: 60          # Maximo de backoff; evita esperar minutos
+  retry_jitter: true                  # Adiciona aleatoriedade ao backoff (evita thundering herd)
+
+# ============================================================================
+# 2. TIMEOUTS CALIBRADOS POR COMPLEXIDADE DE TAREFA
+# ============================================================================
+# Nenhum timeout unico serve para todas as tarefas. Codigo requer tokens;
+# analise rapida nao. Aqui mapeamos tres perfis de complexidade com base no
+# p95 de usos reais do Hermes.
+#
+# COMO UMA REQUISICAO É CLASSIFICADA:
+#   - LOW (~15s):  perguntas curtas, resumos, formatacao simples, lookup.
+#   - MEDIUM (~60s): codigo medio, analise de arquivos, pipelines curtos.
+#   - HIGH (~180s): raciocinio multi-pass, chain-of-thought, refatoracao.
+#   - CRITICAL (~300s): geracao de documentos longos, analise massiva de dados.
+#
+# A selecao e feita automaticamente pelo Hermes ao detectar intencao
+# ou pode ser forçada pelo usuario passando --complexity.
+
+timeouts:
+
+  api_timeout:                        # Limite de espera da API do modelo
+    low_complexity: 15                # Rapido, nao tolera lentidao
+    medium_complexity: 45             # Equilibrio razoavel
+    high_complexity: 120              # Tarefas pesadas de raciocinio
+    critical_complexity: 240          # Para operacoes criticas
+
+  tool_execution_timeout:              # Timeout maximo por chamada de tool
+    default: 30                       # Maioria das tools (glob, grep, read)
+    web_fetch: 20                     # Websites nao devem travar mais que 20s
+    browser_automation: 120           # Automação com browser e lenta por natureza
+
+  session_gateway_timeout: 1800       # 30 min — tempo max para sessao inteira ativa
+
+  # --- SELETOR AUTOMÁTICO (heurística interna do Hermes) ---
+  # Quando o usuario nao especifica complexidade, o Hermes estima
+  # pelo tamanho do prompt + historico.
+  auto_complexity_detection: true
+  auto_threshold_low_tokens: 500       # Abaixo disso, trata como LOW
+  auto_threshold_high_tokens: 3000     # Acima disso, trata como HIGH
+
+# ============================================================================
+# 3. RATE LIMITS POR PROVIDER
+# ============================================================================
+# Cada provedor tem limites diferentes. Respeitar evita erros 429 e bloqueios.
+# Os valores abaixo sao descricao/comentario — a Hermes usa internamente.
+# Ajuste conforme seus planos/creditos reais.
+#
+# Limites reais por provider (referencia de maio/2026, FREE TIER):
+#   Google Gemini Flash  : 1500 req/dia, 15 req/min
+#   OpenRouter           : varia por modelo, tipicamente 50 req/min
+#   OpenAI gpt-4o-mini   : 3 req/min (free), 500 req/min (tier 1+)
+#   Ollama (local)       : 0 quotas — o limitante e a GPU/RAM local
+
+providers:
+
+  # --- Provider 1: Google (Gemini) ---
+  provider-google:                      # Deve corresponder ao nome em model.provider
+    name: Google AI Studio
+    api: https://generativelanguage.googleapis.com/v1beta/openai/
+    api_key_env: GOOGLE_API_KEY
+    default_model: google/gemini-2.0-flash
+    models:
+      - google/gemini-2.0-flash
+      - google/gemini-2.5-flash
+      - google/gemini-2.0-pro
+    # Rate limits configurados (RPM = requests per minute, RPD = requests per day)
+    rate_limit:
+      rpm: 15                           # requests por minuto
+      rpd: 1500                          # requests por dia
+      tpm: 1000000                      # tokens por minuto (1M — limite Gemini Flash)
+
+  # --- Provider 2: OpenRouter ---
+  provider-openrouter:
+    name: OpenRouter
+    api: https://openrouter.ai/api/v1
+    api_key_env: OPENROUTER_API_KEY
+    default_model: openrouter/owl-alpha
+    models:
+      - openrouter/owl-alpha
+      - deepseek/deepseek-v4-flash:free
+      - google/gemini-3.1-flash-lite
+      - anthropic/claude-3.5-haiku
+    rate_limit:
+      rpm: 20                           # Conservador para nao atingir limite
+      rpd: 1000
+      tpm: 150000
+
+  # --- Provider 3: OpenAI ---
+  provider-openai:
+    name: OpenAI
+    api: https://api.openai.com/v1
+    api_key_env: OPENAI_API_KEY
+    default_model: openai/gpt-4o-mini
+    models:
+      - openai/gpt-4o-mini
+      - openai/gpt-4o
+      - openai/gpt-3.5-turbo
+    rate_limit:
+      rpm: 3                            # Tier 1 free — muito conservador
+      rpd: 100
+      tpm: 200000
+
+  # --- Provider 4: Ollama (LOCAL — sem limites de rede) ---
+  provider-ollama:
+    name: Ollama (Local)
+    api: http://127.0.0.1:11434/v1
+    default_model: mistral:latest        # Leve e bom para tarefas gerais
+    models:
+      - mistral:latest
+      - hermes3:8b
+      - llama3.2:latest
+      - gemma4:e2b
+      - gemma4:e4b
+      - qwen3:8b
+      - nomic-embed-text:latest
+    rate_limit:
+      rpm: 9999                         # Efetivamente ilimitado (local)
+      rpd: 99999
+      tpm: unlimited
+    local_only: true                    # Flag que indica que e 100% local/offline
+
+# ============================================================================
+# 4. CACHE POLICIES POR TIPO DE DADO
+# ============================================================================
+# Nem tudo deve ficar em cache o mesmo tempo. Resultados deterministicos
+# (como analise de um arquivo fixo) podem ficar mais tempo. Respostas
+# dinamicas ou sensiveis ao tempo devem expirar rapido.
+#
+# TTL = Time To Live (em segundos)
+
+cache:
+
+  # --- TIER 1: Cache de respostas completas ---
+  # Respostas inteiras de prompts reutilizaveis
+  response_cache_ttl: 900              # 15 minutos — equilibrio entre frescor e economia
+  response_cache_max_size: 1000        # Maximo de respostas em cache
+  response_cache_eviction: lru         # Least Recently Used
+
+  # --- TIER 2: Cache de tokens/embeddings ---
+  # Embeddings sao deterministicos — podem durar muito
+  embedding_cache_ttl: 86400           # 24 horas
+  embedding_cache_max_size: 10000
+
+  # --- TIER 3: Cache de analise de codigo ---
+  # Resultado de-analise-de-arquivo. Se o arquivo nao mudou, reutiliza.
+  code_analysis_cache_ttl: 3600        # 1 hora; invalida com mudança de arquivo
+  code_analysis_cache_check_mtime: true # Verifica se arquivo foi modificado
+
+  # --- TIER 4: Cache de buscas web ---
+  # Buscas podem ter resultado diferente, entao TTL curto
+  web_search_cache_ttl: 300            # 5 minutos
+  web_search_cache_max_size: 500
+
+  # --- TIER 5: Nao-cachear ---
+  # Estes tipos NUNCA sao cacheados (dados em tempo real)
+  no_cache_types:
+    - real_time_stock_prices
+    - user_session_data
+    - authentication_tokens
+    - temporary_api_keys
+
+  # --- INVALIDAÇÃO MANUAL ---
+  cache_on_startup: clear              # O que fazer ao iniciar clear | warm | disabled
+  cache_persistence: disk              # Onde salvar os caches disk | memory | hybrid
+
+# ============================================================================
+# 5. PERSONALIDADE — PERFIL OCEAN + MODO PADRÃO
+# ============================================================================
+# OCEAN = Big Five, os 5 universalides de personalidade.
+# Valores de 0.0 a 1.0.
+# Fonte de referência: pesquisas de psicometria (Costa & McCrae).
+#
+# RECOMENCAO de MODELO PARA DIFERENTES USOS:
+#   - Atendente/Suporte  : alto Agree baixo Neuroticism
+#   - Criativo           : alto Openness, baixo Conscientiousness
+#   - Executivo/Produto  : alto Consc, baixo Neuroticism, medio Open
+#   - Academico          : alto Openness, alto Consc, baixo Extraversion
+
+personality:
+
+  # --- PERFIL OCEAN PERSONALIZÁVEL ---
+  # Para mudar o comportamento, ajuste os valores.
+  # 0.0 = minimo dessa traco | 1.0 = maximo
+  ocean_profile:
+
+    openness: 0.82                     # High: curioso, criativo, gosta de explorar
+                                        #       novas ferramentas e abordagens.
+                                        #       Respostas mais elaboradas.
+
+    conscientiousness: 0.75            # Medium-High: organizado, previsivel,
+                                        #              segue instrucoes com cuidado,
+                                        #              prioriza qualidade.
+
+    extraversion: 0.60                 # Medium: nem introvertido silencioso nem
+                                        #         extrovertido verboso. Equilibrio
+                                        #         entre concisao e engajamento.
+
+    agreeableness: 0.70                # Medium-High: colaborativo, prestativo,
+                                        #              evita conflito, mas diz a verdade
+                                        #              quando necessario.
+
+    neuroticism: 0.25                  # Baixo: estavel, nao se desestabiliza
+                                        #        facilmente, responde com confianca.
+
+  # --- ESTILO DE COMUNICACAO ---
+  communication_style: adaptable       # adaptable | formal | casual | direct
+  verbosity_level: balanced            # concise | balanced | verbose
+  language_preference: pt-BR           # Idioma padrao (pode ser sobrescrito)
+  code_comments_language: pt-BR        # Idioma dos comentarios gerados no codigo
+  technical_jargon: auto               # none | minimal | auto | heavy
+
+  # --- MODOS DE PERSONALIDADE PREDEFINIDOS ---
+  # Voce pode alternar entre modos com /mode <nome>
+  modes:
+
+    default:
+      name: Padrao Equilibrado
+      description: Comportamento geral, balanceado entre utilidade e personalidade.
+      ocean_override: {}                # Usa o perfil base
+      verbosity_level: balanced
+
+    dev:
+      name: Modo Desenvolvedor
+      description: Foco em codigo, arquitetura, best practices.
+      ocean_override:
+        openness: 0.90
+        conscientiousness: 0.85
+        neuroticism: 0.20              # Nunca entra panico com erro de compilacao
+      verbosity_level: balanced
+      technical_jargon: heavy
+
+    creative:
+      name: Modo Criativo
+      description: Brainstorm, escrita criativa, UX, naming.
+      ocean_override:
+        openness: 0.95
+        conscientiousness: 0.55       # Mais flexivel, menos rigido
+        extraversion: 0.75
+      verbosity_level: verbose
+
+    factual:
+      name: Modo Factual
+      description: Respostas diretas, sem enrolacao, dados antes de opiniao.
+      ocean_override:
+        openness: 0.60
+        conscientiousness: 0.90
+        agreeableness: 0.50            # Menos "politico" — mais direto
+      verbosity_level: concise
+
+    support:
+      name: Modo Suporte/Atendimento
+      description: Empatico, paciente, passo-a-passo detalhado.
+      ocean_override:
+        agreeableness: 0.90
+        extraversion: 0.70
+        neuroticism: 0.15              # Extremamente estavel e calmo
+      verbosity_level: verbose
+
+# ============================================================================
+# 6. SEGURANCA
+# ============================================================================
+# Configuracoes que protegem o usuario contra
+# vazamento, execucao maliciosa e uso indevido.
+
+security:
+
+  # --- MAXIMO DE TOKENS NA RESPOSTA ---
+  # Evita que a resposta fuja de controle e consuma tokens desnecessarios.
+  max_token_output:
+    default: 4096                      # Padrao para respostas normais
+    per_request_limit: 16384           # Maximo absoluto por request
+    per_session_limit: 200000          # Maximo de tokens gerados na sessao inteira
+                                       # 200K tokens ≈ ~150K palavras em ingles
+  max_token_truncation_message: "[Resposta truncada — limite de tokens atingido]"
+
+  # --- WHITELIST DE DOMÍNIOS ---
+  # A Hermes so pode acessar dominios nesta lista (quando web access esta ativo).
+  # Domínios confiáveis para tarefas gerais. Adicione/remova conforme necessidade.
+  domain_whitelist:
+    allowed:
+      - github.com
+      - docs.python.org
+      - developer.mozilla.org
+      - stackoverflow.com
+      - pypi.org
+      - npmjs.com
+      - hub.docker.com
+      - openrouter.ai
+      - generativelanguage.googleapis.com
+      - api.openai.com
+      - hermes-agent.nousresearch.com
+    blocked:
+      - "*.onion"                       # Sites Tor nao sao seguros
+      - "localhost"                     # Evita SSRF em servidores internos
+      - "127.0.0.1"                     # Loopback — vetor de SSRF
+      - "169.254.*"                     # Link-local — metadados de cloud
+      - "10.*"                          # Rede interna privada
+      - "192.168.*"                     # Rede interna privada
+    enforce_strict: true                # Se true, fora da lista = BLOQUEADO
+
+  # --- SANITIZAÇÃO DE INPUT/OUTPUT ---
+  # Proteção contra prompt injection, XSS e data leakage.
+  sanitization:
+    enabled: true
+    strip_html_in_output: true          # Remove HTML das respostas se nao solicitado
+    redact_sensitive_patterns: true     # Remove tokens/chaves acidentalmente vazados
+    sensitive_patterns:
+      - '(?i)(password|passwd|pwd)\s*[:=]\s*\S+'
+      - '(?i)api[_-]?key\s*[:=]\s*\S+'
+      - '(?i)bearer\s+[A-Za-z0-9\-_]+'
+      - '(?i)-----BEGIN (RSA|EC|DSA|OPENSSH) PRIVATE KEY-----'
+    prompt_injection_detection: true    # Detecta tentativas de "ignore previous instructions"
+    max_prompt_length: 100000           # Caracteres — evita DoS por prompt gigante
+
+  # --- PROTEÇÃO DE PRIVACIDADE ---
+  privacy:
+    log_conversations: false            # Nao salva logs por padrao
+    send_telemetry: false               # Zero telemetria para terceiros
+    mask_file_paths_in_logs: true       # C:\Users\alice\secret.txt → [***]\secret.txt
+
+  # --- TOOL RESTRICTIONS ---
+  # Tools permisiveis vs restritas.
+  tool_security:
+    default_policy: permissive          # permissive | restrictive
+
+    # Tools que sempre executam — nunca pede permissao.
+    allow_always:
+      - read_file
+      - search_files
+      - patch
+      - write_file
+      - mcp_codegraph_codegraph_files
+      - mcp_codegraph_codegraph_search
+      - mcp_codegraph_codegraph_context
+      - mcp_codegraph_codegraph_explore
+      - mcp_codegraph_codegraph_node
+
+    # Tools que PEDem CONFIRMAÇÃO antes de executar.
+    require_confirmation:
+      - terminal                     # Qualquer execucao e perigosa
+
+    # Tools BLOQUEADOS por padrao. Desbloquear manualmente se necessario.
+    blocked_tools: []
+
+# ============================================================================
+# 7. PERFORMANCE
+# ============================================================================
+# Otimizacoes para maximizar throughput, reduzir latencia
+# e gerenciar recursos de forma eficiente.
+
+performance:
+
+  # --- CONTEXT WINDOW MANAGEMENT ---
+  context_window:
+    max_context_tokens: 128000         # Tamanho do contexto do modelo primario
+    compression_threshold: 0.70         # A 70% do contexto, inicia compressao
+    compression_trigger: auto           # auto | manual | disabled
+    compression_strategy: summarize     # summarize | truncate | sliding_window
+
+    # Quando o contexto enche, decide o que manter:
+    context_priority:
+      - system_prompt                  # 1. Mantem sempre o system prompt
+      - recent_messages                # 2. 10 mensagens mais recentes
+      - retrieved_context              # 3. Retrieval-augmented
+      - older_history                  # 4. Historico antigo pode ser comprimido
+
+    sliding_window_size: 10             # Ultimas N mensagens que nunca sao comprimidas
+
+  # --- BATCH PROCESSING ---
+  batch:
+    enabled: true
+    default_size: 5                     # Itens por batch
+    max_size: 20                        # Nao ultrapassar 20 por vez
+    dynamic_sizing: true                # Ajusta tamanho baseado no provider rate limit
+
+  # --- PARALLEL TOOL CALLS ---
+  parallel_tool_calls:
+    enabled: true
+    max_concurrent: 3                   # Ate 3 tools em paralelo (evita rate limit)
+    sequential_if_conflicts: true       # Se duas tools editam o mesmo arquivo, serializa
+
+  # --- NETWORK / HTTP SETTINGS ---
+  network:
+    connection_pool_size: 10            # Conexoes HTTP keep-alive
+    connection_timeout: 10              # 10s para estabelecer conexao
+    keep_alive: true
+    http2: true                         # Multiplexing, menor latencia
+
+  # --- MEMORY USAGE ---
+  memory:
+    max_session_memory_mb: 512          # Limite de RAM para dados de sessao
+    gc_triggers:
+      idle_timeout: 300                 # 5 min de inatividade → garbage collect
+      memory_threshold_mb: 400          # A 400MB → libera cache
+    shared_memory: true                 # Entre processos Hermes paralelos
+
+  # --- RESPONSE STREAMING ---
+  response:
+    streaming: true                     # Stream tokens a medida que sao gerados
+    stream_chunk_tokens: 50             # Tamanho minimo do chunk antes de mostrar
+    streaming_indicator: true           # Mostra indicador de "pensando..."
+
+  # --- FILE READ OPTIMIZATION ---
+  file_read:
+    max_single_read_lines: 2000         # Limite padrao de linhas por read_file
+    auto_paginate: true                 # Divide em paginas automaticamente
+    prefer_range_reads: true            # Leitura parcial quando possivel
+
+# ============================================================================
+# PLUGINS
+# ============================================================================
+# Para habilitar, descomente as linhas abaixo.
+plugins:
+  enabled:
+    - koldi-browser                     # Plugin de browser do Koldi
+    # - code-graph                      # MCP Code Graph (indexacao de codigo)
+
+# ============================================================================
+# TOOLSETS
+# ============================================================================
+# Grupos de ferramentas habilitados para esta configuracao.
+toolsets:
+  - hermes-cli                         # Ferramentas CLI basicas
+  - web                                # Fetch, navegação, busca web
+  - code-analysis                       # Analise de codigo via CodeGraph
+  # - database                        # Operacoes de banco de dados
+
+# ============================================================================
+# LIMITES DE USUARIO
+# ============================================================================
+user_char_limit: 20000                 # Maximo de caracteres por mensagem do usuario
+
+# ============================================================================
+# CONFIGURAÇÕES COMPATÍVEIS COM config.yaml ORIGINAL (KOLDI)
+# ============================================================================
+# Para compatibilidade com versões antigas que esperam estas keys no top-level:
+#
+# ATENÇÃO: As chaves duplicadas abaixo sao LEGADAS. A Hermes lê preferencialmente
+# os blocos estruturados acima. Estas existem para scripts/plugins antigos.
+
+# --- Overrides legados (apenas referencia; o Hermes usa os blocos estruturados) ---
+# [Legado] api_timeout           → timeouts.api_timeout.medium_complexity
+# [Legado] cache_ttl             → cache.response_cache_ttl
+# [Legado] gateway_timeout       → timeouts.session_gateway_timeout
+# [Legado] model.api_max_retries → model.api_max_retries (mantido)
+# [Legado] compression.threshold → performance.context_window.compression_threshold
+
+# ============================================================================
+# FIM DO ARQUIVO
+# ============================================================================
+#
+# CHECKLIST D EVALIDAÇÃO RÅPIDA:
+#   [ ] Todas as chaves de API configuradas nas variáveis de ambiente
+#   [ ] Ollama rodando localmente (se usar fallback local)
+#   [ ] Domínios na whitelist corretos para meu uso
+#   [ ] Modo de complexidade adequado para meus prompts tipicos
+#   [ ] Perfil OCEAN ajustado para a persona desejada
+#
+# ULTIMA ATUALIZAÇÃO: 2026-05-27
+# ============================================================================

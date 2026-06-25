@@ -1,0 +1,12 @@
+{
+  "conexao": true,
+  "heartbeat": false,
+  "reconcile": false,
+  "a2a_message": true,
+  "sync_push": true,
+  "erros": [
+    "heartbeat_timeout",
+    "reconcile_timeout"
+  ],
+  "latencia_ms": null
+}

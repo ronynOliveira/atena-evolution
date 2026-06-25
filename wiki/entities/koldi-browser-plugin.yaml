@@ -1,0 +1,69 @@
+#!/usr/bin/env python3
+"""
+plugin_v2.yaml — Koldi Browser Plugin v2 (Seguro)
+
+Melhorias sobre v1:
+- Whitelist de domínios
+- Rate limiting por ferramenta
+- Sanitização de inputs
+- Sandbox para evaluate (anti JS injection)
+- Session timeout automático
+- Logging de auditoria
+- Confirmação por voz para ações destrutivas
+- Health check periódico
+"""
+
+name: koldi-browser
+version: 2.0.0
+description: >
+  Koldi's Browser Controller v2 — plugin de navegador com segurança reforçada.
+  Whitelist de domínios, rate limiting, sanitização de inputs, sandbox JS,
+  session timeout, auditoria, e confirmação por voz para ações destrutivas.
+  Backend primário: Kimi WebBridge (porta 10086). Fallback: Chrome CDP (porta 9222).
+author: "Koldi para Senhor Robério"
+provides_tools:
+  - browser_koldi_status
+  - browser_koldi_navigate
+  - browser_koldi_snapshot
+  - browser_koldi_click
+  - browser_koldi_fill
+  - browser_koldi_screenshot
+  - browser_koldi_list_tabs
+  - browser_koldi_close_session
+  - browser_koldi_evaluate
+  - browser_koldi_health_check
+  - browser_koldi_audit_log
+  - browser_koldi_security_config
+provides_hooks:
+  - pre_tool_call
+  - post_tool_call
+security:
+  domain_whitelist:
+    enabled: true
+    domains:
+      - "*.google.com"
+      - "*.github.com"
+      - "*.wikipedia.org"
+      - "*.gov.br"
+      - "*.edu.br"
+      - "*.org"
+      - "localhost"
+      - "127.0.0.1"
+    blocked_domains:
+      - "*.onion"
+      - "*.local"
+      - "10.*"
+      - "192.168.*"
+  rate_limiting:
+    enabled: true
+    limits:
+      navigate: {max: 10, window_seconds: 30}
+      click: {max: 20, window_seconds: 30}
+      fill: {max: 15, window_seconds: 30}
+      evaluate: {max: 10, window_seconds: 30}
+      close_session: {max: 3, window_seconds: 60}
+  session_timeout_minutes: 30
+  audit_logging: true
+  require_voice_confirmation:
+    - close_session
+    - evaluate_with_side_effects

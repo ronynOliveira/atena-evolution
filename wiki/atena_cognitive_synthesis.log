@@ -1,0 +1,167 @@
+2025-07-09 18:52:09,954 - [root] - [ERROR] - Piper TTS não disponível. Sistema não funcionará sem ele.
+2025-07-09 18:52:53,263 - [root] - [ERROR] - Piper TTS não disponível. Sistema não funcionará sem ele.
+2025-07-09 18:53:30,695 - [root] - [ERROR] - Piper TTS não disponível. Sistema não funcionará sem ele.
+2025-07-09 18:54:14,949 - [root] - [ERROR] - Piper TTS não disponível. Sistema não funcionará sem ele.
+2025-07-09 19:12:49,001 - [root] - [ERROR] - Piper TTS não disponível. Sistema não funcionará sem ele.
+2025-07-09 19:13:43,041 - [root] - [ERROR] - Piper TTS não disponível. Sistema não funcionará sem ele.
+2025-07-09 19:14:30,672 - [root] - [ERROR] - Piper TTS não disponível. Sistema não funcionará sem ele.
+2025-07-09 19:15:22,181 - [root] - [ERROR] - Piper TTS não disponível. Sistema não funcionará sem ele.
+2025-07-09 19:16:19,620 - [root] - [ERROR] - Piper TTS não disponível. Sistema não funcionará sem ele.
+2025-07-09 19:17:17,150 - [root] - [ERROR] - Piper TTS não disponível. Sistema não funcionará sem ele.
+2025-07-09 19:18:42,484 - [root] - [ERROR] - Piper TTS não disponível. Sistema não funcionará sem ele.
+2025-07-09 19:18:43,456 - [faiss.loader] - [INFO] - Loading faiss with AVX2 support.
+2025-07-09 19:18:43,587 - [faiss.loader] - [INFO] - Successfully loaded faiss with AVX2 support.
+2025-07-09 19:19:36,855 - [root] - [ERROR] - Piper TTS não disponível. Sistema não funcionará sem ele.
+2025-07-09 19:19:37,466 - [faiss.loader] - [INFO] - Loading faiss with AVX2 support.
+2025-07-09 19:19:37,490 - [faiss.loader] - [INFO] - Successfully loaded faiss with AVX2 support.
+2025-07-09 19:20:25,627 - [root] - [ERROR] - Piper TTS não disponível. Sistema não funcionará sem ele.
+2025-07-09 19:20:26,352 - [faiss.loader] - [INFO] - Loading faiss with AVX2 support.
+2025-07-09 19:20:26,377 - [faiss.loader] - [INFO] - Successfully loaded faiss with AVX2 support.
+2025-07-09 19:21:14,006 - [root] - [ERROR] - Piper TTS não disponível. Sistema não funcionará sem ele.
+2025-07-09 19:21:14,715 - [faiss.loader] - [INFO] - Loading faiss with AVX2 support.
+2025-07-09 19:21:14,740 - [faiss.loader] - [INFO] - Successfully loaded faiss with AVX2 support.
+2025-07-09 19:22:04,299 - [root] - [ERROR] - Piper TTS não disponível. Sistema não funcionará sem ele.
+2025-07-09 19:22:04,953 - [faiss.loader] - [INFO] - Loading faiss with AVX2 support.
+2025-07-09 19:22:04,978 - [faiss.loader] - [INFO] - Successfully loaded faiss with AVX2 support.
+2025-07-09 19:22:53,170 - [root] - [ERROR] - Piper TTS não disponível. Sistema não funcionará sem ele.
+2025-07-09 19:22:53,782 - [faiss.loader] - [INFO] - Loading faiss with AVX2 support.
+2025-07-09 19:22:53,805 - [faiss.loader] - [INFO] - Successfully loaded faiss with AVX2 support.
+2025-07-09 19:23:42,444 - [root] - [ERROR] - Piper TTS não disponível. Sistema não funcionará sem ele.
+2025-07-09 19:23:43,039 - [faiss.loader] - [INFO] - Loading faiss with AVX2 support.
+2025-07-09 19:23:43,062 - [faiss.loader] - [INFO] - Successfully loaded faiss with AVX2 support.
+2025-07-09 19:24:41,623 - [root] - [ERROR] - Piper TTS não disponível. Sistema não funcionará sem ele.
+2025-07-09 19:24:42,010 - [faiss.loader] - [INFO] - Loading faiss with AVX2 support.
+2025-07-09 19:24:42,035 - [faiss.loader] - [INFO] - Successfully loaded faiss with AVX2 support.
+2025-07-09 19:25:38,003 - [root] - [ERROR] - Piper TTS não disponível. Sistema não funcionará sem ele.
+2025-07-09 19:25:38,552 - [faiss.loader] - [INFO] - Loading faiss with AVX2 support.
+2025-07-09 19:25:38,579 - [faiss.loader] - [INFO] - Successfully loaded faiss with AVX2 support.
+2025-07-09 19:27:26,696 - [root] - [ERROR] - Piper TTS não disponível. Sistema não funcionará sem ele.
+2025-07-09 19:27:28,274 - [faiss.loader] - [INFO] - Loading faiss with AVX2 support.
+2025-07-09 19:27:28,343 - [faiss.loader] - [INFO] - Successfully loaded faiss with AVX2 support.
+2025-07-09 19:28:49,856 - [root] - [ERROR] - Piper TTS não disponível. Sistema não funcionará sem ele.
+2025-07-09 19:28:50,307 - [faiss.loader] - [INFO] - Loading faiss with AVX2 support.
+2025-07-09 19:28:50,329 - [faiss.loader] - [INFO] - Successfully loaded faiss with AVX2 support.
+2025-07-09 19:28:51,842 - [AtenaEcossistema] - [INFO] - Iniciando Servidor do Ecossistema Atena com Uvicorn...
+2025-07-09 19:28:51,937 - [AtenaEcossistema] - [INFO] - Iniciando ciclo de vida do Ecossistema Atena v4.3...
+2025-07-09 19:28:51,952 - [AtenaEcossistema] - [INFO] - Configuração central validada e carregada.
+2025-07-09 19:28:51,952 - [AtenaEthicalFramework] - [INFO] - Framework Ético Avançado instanciado.
+2025-07-09 19:28:51,959 - [atena_personalidade] - [INFO] - UltraAdvancedSoulConsolidator inicializado (CPU).
+2025-07-09 19:28:52,005 - [atena_personalidade] - [INFO] - Banco de dados SQLite para personalidade inicializado: atena_soul_v3.db
+2025-07-09 19:28:52,005 - [atena_personalidade] - [INFO] - Diretórios criados/verificados: analytics, personality_reports, model_artifacts
+2025-07-09 19:28:52,006 - [atena_personalidade] - [INFO] - Nenhum genoma encontrado. Criando um genoma avançado padrão.
+2025-07-09 19:28:52,007 - [atena_personalidade] - [INFO] - Novo genoma padrão salvo em atena_soul_v3.yaml
+2025-07-09 19:28:52,007 - [AtenaSinteseCognitivaAvancada] - [INFO] - Inicializando modelos de IA no dispositivo: cpu
+2025-07-09 19:28:52,007 - [sentence_transformers.SentenceTransformer] - [INFO] - Load pretrained SentenceTransformer: intfloat/multilingual-e5-large
+2025-07-09 19:30:02,814 - [root] - [INFO] - Modelo de embedding 'intfloat/multilingual-e5-large' inicializado em 'cpu'.
+2025-07-09 19:30:02,816 - [root] - [WARNING] - Modelo SpaCy 'pt_core_news_sm' não encontrado. Baixando...
+2025-07-09 19:30:02,816 - [AtenaEcossistema] - [CRITICAL] - FALHA CRÍTICA DURANTE A INICIALIZAÇÃO: name 'os' is not defined
+Traceback (most recent call last):
+  File "C:\Users\dell-\OneDrive\Documentos\voz\2\painel_backend\assistente Atena\backend\app\atena_inteligencia.py", line 133, in _initialize_models
+    self.nlp = spacy.load(self.config.spacy_model)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dell-\AppData\Local\Programs\Python\Python311\Lib\site-packages\spacy\__init__.py", line 51, in load
+    return util.load_model(
+           ^^^^^^^^^^^^^^^^
+  File "C:\Users\dell-\AppData\Local\Programs\Python\Python311\Lib\site-packages\spacy\util.py", line 472, in load_model
+    raise IOError(Errors.E050.format(name=name))
+OSError: [E050] Can't find model 'pt_core_news_sm'. It doesn't seem to be a Python package or a valid path to a data directory.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\dell-\OneDrive\Documentos\voz\2\painel_backend\assistente Atena\backend\app\atena_servidor_unified.py", line 54, in lifespan
+    atena_modules["cognitive_architecture"] = AtenaCognitiveArchitecture(config)
+                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dell-\OneDrive\Documentos\voz\2\painel_backend\assistente Atena\backend\app\atena_inteligencia.py", line 149, in __init__
+    self.semantic_analyzer = SemanticAnalyzer(config)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dell-\OneDrive\Documentos\voz\2\painel_backend\assistente Atena\backend\app\atena_inteligencia.py", line 129, in __init__
+    self._initialize_models()
+  File "C:\Users\dell-\OneDrive\Documentos\voz\2\painel_backend\assistente Atena\backend\app\atena_inteligencia.py", line 136, in _initialize_models
+    os.system(f"python -m spacy download {self.config.spacy_model}")
+    ^^
+NameError: name 'os' is not defined
+2025-07-09 20:00:59,365 - [root] - [ERROR] - Piper TTS não disponível. Sistema não funcionará sem ele.
+2025-07-09 20:01:00,224 - [faiss.loader] - [INFO] - Loading faiss with AVX2 support.
+2025-07-09 20:01:00,258 - [faiss.loader] - [INFO] - Successfully loaded faiss with AVX2 support.
+2025-07-09 20:01:02,989 - [AtenaEcossistema] - [INFO] - Iniciando Servidor do Ecossistema Atena com Uvicorn...
+2025-07-09 20:01:03,079 - [AtenaEcossistema] - [INFO] - Iniciando ciclo de vida do Ecossistema Atena v4.3...
+2025-07-09 20:01:03,095 - [AtenaEcossistema] - [INFO] - Configuração central validada e carregada.
+2025-07-09 20:01:03,095 - [AtenaEthicalFramework] - [INFO] - Framework Ético Avançado instanciado.
+2025-07-09 20:01:03,095 - [atena_personalidade] - [INFO] - UltraAdvancedSoulConsolidator inicializado (CPU).
+2025-07-09 20:01:03,095 - [atena_personalidade] - [INFO] - Banco de dados SQLite para personalidade inicializado: atena_soul_v3.db
+2025-07-09 20:01:03,095 - [atena_personalidade] - [INFO] - Diretórios criados/verificados: analytics, personality_reports, model_artifacts
+2025-07-09 20:01:03,095 - [atena_personalidade] - [INFO] - Carregando genoma existente de atena_soul_v3.yaml
+2025-07-09 20:01:03,109 - [AtenaSinteseCognitivaAvancada] - [INFO] - Inicializando modelos de IA no dispositivo: cpu
+2025-07-09 20:01:03,109 - [sentence_transformers.SentenceTransformer] - [INFO] - Load pretrained SentenceTransformer: intfloat/multilingual-e5-large
+2025-07-09 20:01:11,688 - [root] - [INFO] - Modelo de embedding 'intfloat/multilingual-e5-large' inicializado em 'cpu'.
+2025-07-09 20:01:11,688 - [root] - [WARNING] - Modelo SpaCy 'pt_core_news_sm' não encontrado. Baixando...
+2025-07-09 20:01:11,688 - [AtenaEcossistema] - [CRITICAL] - FALHA CRÍTICA DURANTE A INICIALIZAÇÃO: name 'os' is not defined
+Traceback (most recent call last):
+  File "C:\Users\dell-\OneDrive\Documentos\voz\2\painel_backend\assistente Atena\backend\app\atena_inteligencia.py", line 133, in _initialize_models
+    self.nlp = spacy.load(self.config.spacy_model)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dell-\AppData\Local\Programs\Python\Python311\Lib\site-packages\spacy\__init__.py", line 51, in load
+    return util.load_model(
+           ^^^^^^^^^^^^^^^^
+  File "C:\Users\dell-\AppData\Local\Programs\Python\Python311\Lib\site-packages\spacy\util.py", line 472, in load_model
+    raise IOError(Errors.E050.format(name=name))
+OSError: [E050] Can't find model 'pt_core_news_sm'. It doesn't seem to be a Python package or a valid path to a data directory.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\dell-\OneDrive\Documentos\voz\2\painel_backend\assistente Atena\backend\app\atena_servidor_unified.py", line 54, in lifespan
+    atena_modules["cognitive_architecture"] = AtenaCognitiveArchitecture(config)
+                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dell-\OneDrive\Documentos\voz\2\painel_backend\assistente Atena\backend\app\atena_inteligencia.py", line 149, in __init__
+    self.semantic_analyzer = SemanticAnalyzer(config)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dell-\OneDrive\Documentos\voz\2\painel_backend\assistente Atena\backend\app\atena_inteligencia.py", line 129, in __init__
+    self._initialize_models()
+  File "C:\Users\dell-\OneDrive\Documentos\voz\2\painel_backend\assistente Atena\backend\app\atena_inteligencia.py", line 136, in _initialize_models
+    os.system(f"python -m spacy download {self.config.spacy_model}")
+    ^^
+NameError: name 'os' is not defined
+2025-07-09 21:09:26,219 - [root] - [ERROR] - Piper TTS não disponível. Sistema não funcionará sem ele.
+2025-07-09 21:09:26,748 - [faiss.loader] - [INFO] - Loading faiss with AVX2 support.
+2025-07-09 21:09:26,769 - [faiss.loader] - [INFO] - Successfully loaded faiss with AVX2 support.
+2025-07-09 21:09:28,155 - [AtenaEcossistema] - [INFO] - Iniciando Servidor do Ecossistema Atena com Uvicorn...
+2025-07-09 21:09:28,214 - [AtenaEcossistema] - [INFO] - Iniciando ciclo de vida do Ecossistema Atena v4.3...
+2025-07-09 21:09:28,219 - [AtenaEcossistema] - [INFO] - Configuração central validada e carregada.
+2025-07-09 21:09:28,219 - [AtenaEthicalFramework] - [INFO] - Framework Ético Avançado instanciado.
+2025-07-09 21:09:28,219 - [atena_personalidade] - [INFO] - UltraAdvancedSoulConsolidator inicializado (CPU).
+2025-07-09 21:09:28,219 - [atena_personalidade] - [INFO] - Banco de dados SQLite para personalidade inicializado: atena_soul_v3.db
+2025-07-09 21:09:28,229 - [atena_personalidade] - [INFO] - Diretórios criados/verificados: analytics, personality_reports, model_artifacts
+2025-07-09 21:09:28,229 - [atena_personalidade] - [INFO] - Carregando genoma existente de atena_soul_v3.yaml
+2025-07-09 21:09:28,232 - [AtenaSinteseCognitivaAvancada] - [INFO] - Inicializando modelos de IA no dispositivo: cpu
+2025-07-09 21:09:28,232 - [sentence_transformers.SentenceTransformer] - [INFO] - Load pretrained SentenceTransformer: intfloat/multilingual-e5-large
+2025-07-09 21:09:33,239 - [root] - [INFO] - Modelo de embedding 'intfloat/multilingual-e5-large' inicializado em 'cpu'.
+2025-07-09 21:09:33,239 - [root] - [WARNING] - Modelo SpaCy 'pt_core_news_sm' não encontrado. Baixando...
+2025-07-09 21:09:33,239 - [AtenaEcossistema] - [CRITICAL] - FALHA CRÍTICA DURANTE A INICIALIZAÇÃO: name 'os' is not defined
+Traceback (most recent call last):
+  File "C:\Users\dell-\OneDrive\Documentos\voz\2\painel_backend\assistente Atena\backend\app\atena_inteligencia.py", line 133, in _initialize_models
+    self.nlp = spacy.load(self.config.spacy_model)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dell-\AppData\Local\Programs\Python\Python311\Lib\site-packages\spacy\__init__.py", line 51, in load
+    return util.load_model(
+           ^^^^^^^^^^^^^^^^
+  File "C:\Users\dell-\AppData\Local\Programs\Python\Python311\Lib\site-packages\spacy\util.py", line 472, in load_model
+    raise IOError(Errors.E050.format(name=name))
+OSError: [E050] Can't find model 'pt_core_news_sm'. It doesn't seem to be a Python package or a valid path to a data directory.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\dell-\OneDrive\Documentos\voz\2\painel_backend\assistente Atena\backend\app\atena_servidor_unified.py", line 54, in lifespan
+    atena_modules["cognitive_architecture"] = AtenaCognitiveArchitecture(config)
+                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dell-\OneDrive\Documentos\voz\2\painel_backend\assistente Atena\backend\app\atena_inteligencia.py", line 149, in __init__
+    self.semantic_analyzer = SemanticAnalyzer(config)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\dell-\OneDrive\Documentos\voz\2\painel_backend\assistente Atena\backend\app\atena_inteligencia.py", line 129, in __init__
+    self._initialize_models()
+  File "C:\Users\dell-\OneDrive\Documentos\voz\2\painel_backend\assistente Atena\backend\app\atena_inteligencia.py", line 136, in _initialize_models
+    os.system(f"python -m spacy download {self.config.spacy_model}")
+    ^^
+NameError: name 'os' is not defined

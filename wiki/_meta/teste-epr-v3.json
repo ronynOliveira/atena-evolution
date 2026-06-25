@@ -1,0 +1,12 @@
+{
+  "conexao": true,
+  "heartbeat": false,
+  "reconcile": false,
+  "a2a": true,
+  "sync": true,
+  "erros": [
+    "hb_timeout",
+    "rc_timeout"
+  ],
+  "latencia": null
+}

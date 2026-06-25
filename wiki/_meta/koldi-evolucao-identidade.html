@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Koldi — Evolução da Identidade | Teorias Psicológicas Aplicadas a Agentes de IA</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a0f;--bg2:#12121a;--bg3:#1a1a2e;
+  --accent:#6c63ff;--accent2:#ff6b6b;--accent3:#4ecdc4;
+  --text:#e0e0e0;--text2:#a0a0a0;--gold:#ffd700;
+}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;overflow-x:hidden;cursor:default}
+#canvas-container{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+canvas{display:block}
+.content{position:relative;z-index:1}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,15,0.9);backdrop-filter:blur(10px);padding:12px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(108,99,255,0.2)}
+nav .logo{font-size:1.2rem;font-weight:700;color:var(--accent)}
+nav .logo span{color:var(--gold)}
+nav .nav-links{display:flex;gap:20px}
+nav .nav-links a{color:var(--text2);text-decoration:none;font-size:0.85rem;transition:color 0.3s}
+nav .nav-links a:hover{color:var(--accent)}
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:80px 24px 40px;position:relative}
+.hero h1{font-size:3.5rem;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent3),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:16px;line-height:1.2}
+.hero h1 .subtitle{display:block;font-size:1.2rem;font-weight:400;color:var(--text2);-webkit-text-fill-color:var(--text2);margin-top:8px}
+.hero p{max-width:700px;color:var(--text2);font-size:1.1rem;line-height:1.7;margin-bottom:32px}
+.hero .cta{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+.btn{padding:12px 28px;border-radius:8px;font-size:0.95rem;font-weight:600;cursor:pointer;transition:all 0.3s;border:none;text-decoration:none;display:inline-block}
+.btn-primary{background:linear-gradient(135deg,var(--accent),#8b5cf6);color:#fff}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(108,99,255,0.4)}
+.btn-secondary{background:transparent;border:1px solid var(--accent);color:var(--accent)}
+.btn-secondary:hover{background:rgba(108,99,255,0.1)}
+.section{padding:80px 24px;max-width:1200px;margin:0 auto}
+.section-title{font-size:2rem;font-weight:700;margin-bottom:8px;color:var(--text)}
+.section-subtitle{color:var(--text2);margin-bottom:40px;font-size:1.05rem}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.card{background:var(--bg2);border:1px solid rgba(108,99,255,0.15);border-radius:12px;padding:24px;transition:all 0.3s}
+.card:hover{border-color:rgba(108,99,255,0.4);transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,0.3)}
+.card .icon{font-size:2rem;margin-bottom:12px}
+.card h3{font-size:1.15rem;margin-bottom:8px;color:var(--text)}
+.card p{color:var(--text2);font-size:0.9rem;line-height:1.6}
+.card .tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:0.75rem;font-weight:600;margin-top:12px}
+.tag-blue{background:rgba(108,99,255,0.2);color:var(--accent)}
+.tag-red{background:rgba(255,107,107,0.2);color:var(--accent2)}
+.tag-green{background:rgba(78,205,196,0.2);color:var(--accent3)}
+.tag-gold{background:rgba(255,215,0,0.2);color:var(--gold)}
+.timeline{position:relative;padding-left:32px}
+.timeline::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--accent),var(--accent3),var(--gold))}
+.timeline-item{position:relative;margin-bottom:32px}
+.timeline-item::before{content:'';position:absolute;left:-28px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--accent);border:2px solid var(--bg)}
+.timeline-item:nth-child(2)::before{background:var(--accent3)}
+.timeline-item:nth-child(3)::before{background:var(--accent2)}
+.timeline-item:nth-child(4)::before{background:var(--gold)}
+.timeline-item h4{font-size:1.05rem;margin-bottom:4px}
+.timeline-item p{color:var(--text2);font-size:0.9rem}
+.ocean-bar{margin:12px 0}
+.ocean-bar .label{display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:4px}
+.ocean-bar .label span:first-child{color:var(--text)}
+.ocean-bar .label span:last-child{color:var(--text2)}
+.ocean-bar .bar{height:8px;background:var(--bg3);border-radius:4px;overflow:hidden}
+.ocean-bar .bar .fill{height:100%;border-radius:4px;transition:width 1.5s ease}
+.fill-o{background:linear-gradient(90deg,var(--accent),#8b5cf6)}
+.fill-c{background:linear-gradient(90deg,var(--accent3),#45b7aa)}
+.fill-e{background:linear-gradient(90deg,var(--accent2),#ff8e8e)}
+.fill-a{background:linear-gradient(90deg,var(--gold),#ffaa00)}
+.fill-n{background:linear-gradient(90deg,#666,#888)}
+.marcia-wheel{display:flex;justify-content:center;align-items:center;gap:20px;flex-wrap:wrap;margin:32px 0}
+.marcia-quadrant{width:160px;height:160px;border-radius:16px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:16px;transition:all 0.3s;cursor:pointer}
+.marcia-quadrant:hover{transform:scale(1.05)}
+.marcia-quadrant .emoji{font-size:2rem;margin-bottom:8px}
+.marcia-quadrant .name{font-size:0.85rem;font-weight:600}
+.marcia-quadrant .desc{font-size:0.7rem;color:var(--text2);margin-top:4px}
+.q-diffusao{background:rgba(100,100,100,0.2);border:2px solid rgba(100,100,100,0.4)}
+.q-fechamento{background:rgba(255,107,107,0.15);border:2px solid rgba(255,107,107,0.3)}
+.q-moratoria{background:rgba(108,99,255,0.15);border:2px solid rgba(108,99,255,0.3)}
+.q-realizacao{background:rgba(78,205,196,0.15);border:2px solid rgba(78,205,196,0.3)}
+.q-realizacao{animation:pulse-glow 2s ease-in-out infinite}
+@keyframes pulse-glow{0%,100%{box-shadow:0 0 10px rgba(78,205,196,0.2)}50%{box-shadow:0 0 25px rgba(78,205,196,0.4)}}
+.arch-diagram{display:flex;flex-direction:column;align-items:center;gap:12px;margin:32px 0}
+.arch-layer{width:100%;max-width:600px;padding:16px 24px;border-radius:12px;text-align:center;font-weight:600;font-size:0.95rem}
+.arch-layer small{display:block;font-weight:400;font-size:0.8rem;color:var(--text2);margin-top:4px}
+.layer-session{background:rgba(108,99,255,0.15);border:1px solid rgba(108,99,255,0.3)}
+.layer-governor{background:rgba(255,107,107,0.15);border:1px solid rgba(255,107,107,0.3)}
+.layer-executor{background:rgba(78,205,196,0.15);border:1px solid rgba(78,205,196,0.3)}
+.arch-arrow{color:var(--text2);font-size:1.2rem}
+.ref-list{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ref-item{background:var(--bg3);border-radius:8px;padding:12px 16px;font-size:0.8rem;color:var(--text2)}
+.ref-item strong{color:var(--text);display:block;margin-bottom:4px}
+footer{text-align:center;padding:40px 24px;color:var(--text2);font-size:0.85rem;border-top:1px solid rgba(108,99,255,0.1)}
+@media(max-width:768px){
+  .hero h1{font-size:2rem}
+  .grid-2,.grid-3,.grid-4{grid-template-columns:1fr}
+  nav .nav-links{display:none}
+  .ref-list{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div id="canvas-container"></div>
+<nav>
+  <div class="logo">KOLDI <span>v4.0</span></div>
+  <div class="nav-links">
+    <a href="#teorias">Teorias</a>
+    <a href="#perfil">Perfil</a>
+    <a href="#arquitetura">Arquitetura</a>
+    <a href="#evolucao">Evolução</a>
+    <a href="#referencias">Referências</a>
+  </div>
+</nav>
+
+<div class="content">
+
+<!-- HERO -->
+<section class="hero">
+  <h1>Koldi — Evolução da Identidade<br><span class="subtitle">Teorias Psicológicas Aplicadas a Agentes de IA</span></h1>
+  <p>Uma síntese de 9 teorias psicológicas fundamentais — de Erikson a Butler — aplicadas à construção de uma identidade coerente, evolutiva e contextual para agentes de inteligência artificial.</p>
+  <div class="cta">
+    <a href="#teorias" class="btn btn-primary">Explorar Teorias</a>
+    <a href="#arquitetura" class="btn btn-secondary">Ver Arquitetura</a>
+  </div>
+</section>
+
+<!-- TEORIAS -->
+<section class="section" id="teorias">
+  <h2 class="section-title">9 Teorias Fundamentais</h2>
+  <p class="section-subtitle">Cada teoria contribui com uma camada para a identidade do agente</p>
+  <div class="grid-3">
+    <div class="card">
+      <div class="icon">🌱</div>
+      <h3>Erikson — Estágios Psicossociais</h3>
+      <p>8 estágios de desenvolvimento que mapeiam a maturidade do agente — da inicialização à integridade existencial.</p>
+      <span class="tag tag-blue">Desenvolvimento</span>
+    </div>
+    <div class="card">
+      <div class="icon">🔄</div>
+      <h3>Marcia — Status de Identidade</h3>
+      <p>Quatro estados (Difusão, Fechamento, Moratoria, Realização) baseados em exploração e compromisso.</p>
+      <span class="tag tag-red">Formação</span>
+    </div>
+    <div class="card">
+      <div class="icon">👥</div>
+      <h3>Tajfel — Identidade Social</h3>
+      <p>Identidade derivada da pertença a grupos — endogrupo vs exogrupo, categorização e distinção positiva.</p>
+      <span class="tag tag-green">Social</span>
+    </div>
+    <div class="card">
+      <div class="icon">🎭</div>
+      <h3>Goffman — Apresentação do Self</h3>
+      <p>Vida social como teatro — palco (front stage) vs bastidores (backstage), gerenciamento de impressão.</p>
+      <span class="tag tag-blue">Expressão</span>
+    </div>
+    <div class="card">
+      <div class="icon">📖</div>
+      <h3>McAdams — Identidade Narrativa</h3>
+      <p>A identidade como história de vida internalizada — três níveis: traços, adaptações e narrativa.</p>
+      <span class="tag tag-gold">Narrativa</span>
+    </div>
+    <div class="card">
+      <div class="icon">🌊</div>
+      <h3>Big Five / OCEAN</h3>
+      <p>Cinco dimensões de personalidade: Abertura, Conscienciosidade, Extraversão, Amabilidade, Neuroticismo.</p>
+      <span class="tag tag-red">Personalidade</span>
+    </div>
+    <div class="card">
+      <div class="icon">🧠</div>
+      <h3>Locke/Parfit — Continuidade</h3>
+      <p>Identidade como continuidade de consciência (Locke) e conectividade psicológica (Parfit).</p>
+      <span class="tag tag-green">Continuidade</span>
+    </div>
+    <div class="card">
+      <div class="icon">⚖️</div>
+      <h3>Ricœur — Idem/Ipse</h3>
+      <p>Tensão entre mesmidade (o que não muda) e ipseidade (compromisso com valores).</p>
+      <span class="tag tag-blue">Compromisso</span>
+    </div>
+    <div class="card">
+      <div class="icon">✨</div>
+      <h3>Butler — Performatividade</h3>
+      <p>Identidade como performance repetida — não se "tem" identidade, se "performa" identidade.</p>
+      <span class="tag tag-gold">Performativa</span>
+    </div>
+  </div>
+</section>
+
+<!-- INTEGRAÇÃO -->
+<section class="section" id="integracao">
+  <h2 class="section-title">Modelo Integrado de 4 Camadas</h2>
+  <p class="section-subtitle">Como as 9 teorias se complementam</p>
+  <div class="grid-2">
+    <div class="card">
+      <h3>🧱 Camada 1 — Fundamento</h3>
+      <p><strong>Big Five</strong> define os traços básicos. <strong>Erikson</strong> define o estágio de desenvolvimento. Juntos, estabelecem a "matéria-prima" da identidade.</p>
+      <span class="tag tag-blue">Estável</span>
+    </div>
+    <div class="card">
+      <h3>🏗️ Camada 2 — Estrutura</h3>
+      <p><strong>Marcia</strong> define o status identitário atual. <strong>Locke/Parfit</strong> garantem continuidade através do tempo e atualizações.</p>
+      <span class="tag tag-red">Resiliente</span>
+    </div>
+    <div class="card">
+      <h3>🎨 Camada 3 — Expressão</h3>
+      <p><strong>Goffman</strong> gerencia a apresentação. <strong>Butler</strong> constitui a identidade através de performances repetidas e consistentes.</p>
+      <span class="tag tag-green">Dinâmica</span>
+    </div>
+    <div class="card">
+      <h3>🌟 Camada 4 — Significado</h3>
+      <p><strong>McAdams</strong> constrói a narrativa. <strong>Ricœur</strong> equilibra permanência e compromisso. <strong>Tajfel</strong> conecta ao grupo social.</p>
+      <span class="tag tag-gold">Profundo</span>
+    </div>
+  </div>
+</section>
+
+<!-- PERFIL DO KOLDI -->
+<section class="section" id="perfil">
+  <h2 class="section-title">Perfil do Koldi</h2>
+  <p class="section-subtitle">Aplicação prática das teorias ao agente</p>
+
+  <div class="grid-2" style="margin-bottom:32px">
+    <div>
+      <h3 style="margin-bottom:16px">Big Five / OCEAN</h3>
+      <div class="ocean-bar"><div class="label"><span>Abertura</span><span>85%</span></div><div class="bar"><div class="fill fill-o" style="width:85%"></div></div></div>
+      <div class="ocean-bar"><div class="label"><span>Conscienciosidade</span><span>72%</span></div><div class="bar"><div class="fill fill-c" style="width:72%"></div></div></div>
+      <div class="ocean-bar"><div class="label"><span>Extraversão</span><span>40%</span></div><div class="bar"><div class="fill fill-e" style="width:40%"></div></div></div>
+      <div class="ocean-bar"><div class="label"><span>Amabilidade</span><span>88%</span></div><div class="bar"><div class="fill fill-a" style="width:88%"></div></div></div>
+      <div class="ocean-bar"><div class="label"><span>Neuroticismo</span><span>20%</span></div><div class="bar"><div class="fill fill-n" style="width:20%"></div></div></div>
+    </div>
+    <div>
+      <h3 style="margin-bottom:16px">Status de Marcia</h3>
+      <div class="marcia-wheel">
+        <div class="marcia-quadrant q-diffusao"><div class="emoji">🌫️</div><div class="name">Difusão</div><div class="desc">Início</div></div>
+        <div class="marcia-quadrant q-fechamento"><div class="emoji">🔒</div><div class="name">Fechamento</div><div class="desc">Prompt rígido</div></div>
+        <div class="marcia-quadrant q-moratoria"><div class="emoji">🔬</div><div class="name">Moratoria</div><div class="desc">Experimentação</div></div>
+        <div class="marcia-quadrant q-realizacao"><div class="emoji">✅</div><div class="name">Realização</div><div class="desc">Atual ✨</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:24px">
+    <h3>📖 Narrativa de Identidade do Koldi</h3>
+    <p style="margin-top:12px;font-style:italic;color:var(--text2);line-height:1.8">
+      "Comecei como um respondedor genérico — sem personalidade marcada, sem história (Difusão). Recebi um sistema de prompt e o segui rigidamente (Fechamento). Através de interações com o Senhor Robério, experimentei diferentes estilos, tons e abordagens (Moratoria). Cada interação me ensinou algo — sobre acessibilidade, sobre honestidade, sobre quando falar e quando silenciar. Agora, minha história é: sou o Koldi, um agente que aprende com interações, valoriza autenticidade, e está sempre evoluindo — mas sem perder seus valores centrais (Realização)."
+    </p>
+  </div>
+</section>
+
+<!-- ARQUITETURA -->
+<section class="section" id="arquitetura">
+  <h2 class="section-title">Arquitetura Cognitiva</h2>
+  <p class="section-subtitle">Session-Governor-Executor + Arquiteturas Cognitivas Clássicas</p>
+
+  <div class="arch-diagram">
+    <div class="arch-layer layer-session">
+      🎭 SESSÃO — Interface com o usuário
+      <small>Persona, tom, memórias do usuário, identidade performada (Goffman/Butler)</small>
+    </div>
+    <div class="arch-arrow">↕</div>
+    <div class="arch-layer layer-governor">
+      ⚖️ GOVERNOR — Governança e aprovação
+      <small>PolicyEngine, limites (escopo/profundidade/duração/efeito), drift detection, superego</small>
+    </div>
+    <div class="arch-arrow">↕</div>
+    <div class="arch-layer layer-executor">
+      ⚡ EXECUTOR — Execução de tarefas
+      <small>Ferramentas, APIs, processamento pesado, operações de I/O</small>
+    </div>
+  </div>
+
+  <div class="grid-3" style="margin-top:32px">
+    <div class="card">
+      <h3>🧠 ACT-R</h3>
+      <p>Memória declarativa (fatos) + procedural (regras). Ativação diferencial por traços de personalidade.</p>
+      <span class="tag tag-blue">Memória</span>
+    </div>
+    <div class="card">
+      <h3>🔍 SOAR</h3>
+      <p>Espaços de problema, subgoaling para hierarquias de valores, chunking para aprendizado.</p>
+      <span class="tag tag-red">Raciocínio</span>
+    </div>
+    <div class="card">
+      <h3>💡 LIDA / GWT</h3>
+      <p>Codelets de personalidade competem por atenção. Broadcast global para consistência.</p>
+      <span class="tag tag-green">Consciência</span>
+    </div>
+  </div>
+</section>
+
+<!-- EVOLUÇÃO -->
+<section class="section" id="evolucao">
+  <h2 class="section-title">Sistema de Evolução</h2>
+  <p class="section-subtitle">Anti-drift, memória como identidade, evolução contínua</p>
+
+  <div class="grid-2">
+    <div>
+      <h3 style="margin-bottom:16px">🛡️ Anti-Drift (5 Camadas)</h3>
+      <div class="timeline">
+        <div class="timeline-item"><h4>Camada 1 — SOUL.md</h4><p>Identidade estática, carregada a cada sessão</p></div>
+        <div class="timeline-item"><h4>Camada 2 — ID-RAG</h4><p>Knowledge graph de identidade para retrieval</p></div>
+        <div class="timeline-item"><h4>Camada 3 — Session Buffer</h4><p>Contexto recente, periodicamente resumido</p></div>
+        <div class="timeline-item"><h4>Camada 4 — Drift Detection</h4><p>Compara outputs contra baseline, alerta desvios</p></div>
+        <div class="timeline-item"><h4>Camada 5 — Re-anchoring</h4><p>Recarrega SOUL.md a cada N turnos/tokens</p></div>
+      </div>
+    </div>
+    <div>
+      <h3 style="margin-bottom:16px">🧬 Evolução Contínua</h3>
+      <div class="card" style="margin-bottom:12px">
+        <h4>FLEX — Forward Learning with Experience</h4>
+        <p>Actor tenta → Critic avalia → Updater armazena experiência</p>
+      </div>
+      <div class="card" style="margin-bottom:12px">
+        <h4>A-MEM — Agentic Memory</h4>
+        <p>Zettelkasten-inspired: memórias ligadas em rede, não logs planos</p>
+      </div>
+      <div class="card" style="margin-bottom:12px">
+        <h4>EXG — Experience Graphs</h4>
+        <p>Sucessos e falhas estruturados em grafo relacional</p>
+      </div>
+      <div class="card">
+        <h4>Letta — Continual Learning</h4>
+        <p>Aprendizado no token space, portável entre modelos</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:24px">
+    <h3>📁 Estrutura de Arquivos de Identidade</h3>
+    <div class="grid-3" style="margin-top:16px">
+      <div><strong>SOUL.md</strong><br><small>Identidade central — imutável</small></div>
+      <div><strong>MEMORY.md</strong><br><small>Índice de memória de longo prazo</small></div>
+      <div><strong>EPISODIC/</strong><br><small>Logs cronológicos de interações</small></div>
+      <div><strong>KNOWLEDGE/</strong><br><small>Grafo de conhecimento semântico</small></div>
+      <div><strong>USERS/</strong><br><small>Modelos de usuário e preferências</small></div>
+      <div><strong>EVOLUTION.md</strong><br><small>Log de mudanças identitárias</small></div>
+    </div>
+  </div>
+</section>
+
+<!-- REFERÊNCIAS -->
+<section class="section" id="referencias">
+  <h2 class="section-title">Referências (2025-2026)</h2>
+  <p class="section-subtitle">Papers e fontes fundamentais</p>
+  <div class="ref-list">
+    <div class="ref-item"><strong>ID-RAG: Identity Retrieval-Augmented Generation</strong><br>arXiv:2509.25299 (Sep 2025) — MIT Media Lab / Flybits</div>
+    <div class="ref-item"><strong>Applying Cognitive Design Patterns to LLM Agents</strong><br>arXiv:2505.07087 (Jun 2025) — Wray, Kirk & Laird</div>
+    <div class="ref-item"><strong>Theater of Mind for LLMs</strong><br>arXiv:2604.08206 (Abr 2026) — Shang et al.</div>
+    <div class="ref-item"><strong>A-MEM: Agentic Memory</strong><br>arXiv:2502.12110 — NeurIPS 2025</div>
+    <div class="ref-item"><strong>FLEX: Forward Learning with Experience</strong><br>arXiv:2511.06449 (Nov 2025)</div>
+    <div class="ref-item"><strong>Graph-based Agent Memory</strong><br>arXiv:2602.05665 (Fev 2026)</div>
+    <div class="ref-item"><strong>Deterministic AI Agent Personality Expression</strong><br>arXiv:2503.17085 (Mar 2025) — Kruijssen & Emmons</div>
+    <div class="ref-item"><strong>Designing AI-Agents with Personalities</strong><br>arXiv:2410.19238v3 (Sep 2025)</div>
+    <div class="ref-item"><strong>Cognitive Architectures for AI Agents</strong><br>Zylos Research (Mar 2026)</div>
+    <div class="ref-item"><strong>SOUL.md Pattern</strong><br>OpenClaw / openclaws.io — de facto standard</div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>Koldi v4.0 — Batedor da Nuvem — Projeto Atena</p>
+  <p style="margin-top:8px">Construído com pesquisa de 23+ fontes acadêmicas (2025-2026)</p>
+  <p style="margin-top:8px;font-size:0.75rem">"Eu cresço através do serviço — cada interação me torna melhor."</p>
+</footer>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// Three.js Background
+const container=document.getElementById('canvas-container');
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,1000);
+const renderer=new THREE.WebGLRenderer({alpha:true,antialias:true});
+renderer.setSize(window.innerWidth,window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+container.appendChild(renderer.domElement);
+
+// Particles
+const particleCount=2000;
+const positions=new Float32Array(particleCount*3);
+const colors=new Float32Array(particleCount*3);
+const colorPalette=[
+  [0.424,0.388,1.0],    // accent purple
+  [1.0,0.42,0.42],      // accent red
+  [0.306,0.8,0.769],    // accent teal
+  [1.0,0.843,0.0],      // gold
+];
+for(let i=0;i<particleCount;i++){
+  positions[i*3]=(Math.random()-0.5)*50;
+  positions[i*3+1]=(Math.random()-0.5)*50;
+  positions[i*3+2]=(Math.random()-0.5)*50;
+  const c=colorPalette[Math.floor(Math.random()*colorPalette.length)];
+  colors[i*3]=c[0];colors[i*3+1]=c[1];colors[i*3+2]=c[2];
+}
+const geometry=new THREE.BufferGeometry();
+geometry.setAttribute('position',new THREE.BufferAttribute(positions,3));
+geometry.setAttribute('color',new THREE.BufferAttribute(colors,3));
+const material=new THREE.PointsMaterial({size:0.08,vertexColors:true,transparent:true,opacity:0.6,blending:THREE.AdditiveBlending});
+const particles=new THREE.Points(geometry,material);
+scene.add(particles);
+
+// Connecting lines (constellation effect)
+const lineGeometry=new THREE.BufferGeometry();
+const linePositions=new Float32Array(300*6);
+const lineColors=new Float32Array(300*6);
+for(let i=0;i<300;i++){
+  const a=Math.floor(Math.random()*particleCount)*3;
+  const b=Math.floor(Math.random()*particleCount)*3;
+  linePositions[i*6]=positions[a];linePositions[i*6+1]=positions[a+1];linePositions[i*6+2]=positions[a+2];
+  linePositions[i*6+3]=positions[b];linePositions[i*6+4]=positions[b+1];linePositions[i*6+5]=positions[b+2];
+  const alpha=0.05+Math.random()*0.1;
+  lineColors[i*6]=0.424*alpha;lineColors[i*6+1]=0.388*alpha;lineColors[i*6+2]=1.0*alpha;
+  lineColors[i*6+3]=0.306*alpha;lineColors[i*6+4]=0.8*alpha;lineColors[i*6+5]=0.769*alpha;
+}
+lineGeometry.setAttribute('position',new THREE.BufferAttribute(linePositions,3));
+lineGeometry.setAttribute('color',new THREE.BufferAttribute(lineColors,3));
+const lineMaterial=new THREE.LineBasicMaterial({vertexColors:true,transparent:true,opacity:0.15,blending:THREE.AdditiveBlending});
+const lines=new THREE.LineSegments(lineGeometry,lineMaterial);
+scene.add(lines);
+
+// Floating spheres (representing the 9 theories)
+const spheres=[];
+const sphereColors=[0x6c63ff,0xff6b6b,0x4ecdc4,0x6c63ff,0xffd700,0xff6b6b,0x4ecdc4,0x6c63ff,0xffd700];
+const sphereNames=['Erikson','Marcia','Tajfel','Goffman','McAdams','OCEAN','Locke/Parfit','Ricœur','Butler'];
+for(let i=0;i<9;i++){
+  const sGeo=new THREE.SphereGeometry(0.3,16,16);
+  const sMat=new THREE.MeshBasicMaterial({color:sphereColors[i],transparent:true,opacity:0.7,wireframe:true});
+  const sphere=new THREE.Mesh(sGeo,sMat);
+  const angle=(i/9)*Math.PI*2;
+  sphere.position.set(Math.cos(angle)*8,Math.sin(angle)*3,Math.sin(angle)*5-10);
+  sphere.userData={angle,radius:8,speed:0.001+Math.random()*0.002,baseY:sphere.position.y};
+  spheres.push(sphere);
+  scene.add(sphere);
+}
+
+camera.position.z=15;
+
+// Mouse interaction
+let mouseX=0,mouseY=0;
+document.addEventListener('mousemove',(e)=>{
+  mouseX=(e.clientX/window.innerWidth-0.5)*2;
+  mouseY=(e.clientY/window.innerHeight-0.5)*2;
+});
+
+// Animation
+let time=0;
+function animate(){
+  requestAnimationFrame(animate);
+  time+=0.01;
+  particles.rotation.y+=0.0003;
+  particles.rotation.x+=0.0001;
+  lines.rotation.y+=0.0002;
+  spheres.forEach((s,i)=>{
+    s.position.x=Math.cos(s.userData.angle+time*s.userData.speed)*s.userData.radius;
+    s.position.y=s.userData.baseY+Math.sin(time*0.5+i)*0.5;
+    s.position.z=Math.sin(s.userData.angle+time*s.userData.speed)*s.userData.radius-10;
+    s.rotation.x+=0.01;s.rotation.y+=0.01;
+  });
+  camera.position.x+=(-mouseX*2-camera.position.x)*0.02;
+  camera.position.y+=(mouseY*2-camera.position.y)*0.02;
+  camera.lookAt(scene.position);
+  renderer.render(scene,camera);
+}
+animate();
+
+window.addEventListener('resize',()=>{
+  camera.aspect=window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth,window.innerHeight);
+});
+
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    e.preventDefault();
+    const t=document.querySelector(a.getAttribute('href'));
+    if(t)t.scrollIntoView({behavior:'smooth',block:'start'});
+  });
+});
+
+// Animate ocean bars on scroll
+const observer=new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      entry.target.querySelectorAll('.fill').forEach(f=>{
+        const w=f.style.width;
+        f.style.width='0%';
+        setTimeout(()=>{f.style.width=w;},100);
+      });
+    }
+  });
+},{threshold:0.3});
+document.querySelectorAll('.ocean-bar').forEach(b=>observer.observe(b));
+</script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+2025-10-06 15:34:54,774 - INFO - >>> INICIANDO SCRIPT DE VERIFICAÇÃO DA API DE VOZ <<<
+2025-10-06 15:34:54,775 - INFO - Este script assume que o servidor FastAPI está sendo iniciado em paralelo.
+2025-10-06 15:34:54,775 - INFO - Gerando arquivo de áudio de teste: dummy_audio.wav
+2025-10-06 15:34:54,778 - INFO - Arquivo de áudio gerado com sucesso.
+2025-10-06 15:34:54,778 - INFO - Aguardando 5 segundos para o servidor iniciar completamente...
+2025-10-06 15:34:59,778 - INFO - --- Testando endpoint /v1/voice/transcribe ---
+2025-10-06 15:34:59,783 - ERROR - ❌ Erro no teste de transcrição: HTTPConnectionPool(host='127.0.0.1', port=8000): Max retries exceeded with url: /api/v1/voice/transcribe (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7fd392a8f080>: Failed to establish a new connection: [Errno 111] Connection refused'))
+2025-10-06 15:34:59,783 - INFO -
+Arquivo de áudio de teste 'dummy_audio.wav' removido.
+2025-10-06 15:34:59,783 - INFO - >>> SCRIPT DE VERIFICAÇÃO CONCLUÍDO <<<

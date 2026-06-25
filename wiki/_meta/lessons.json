@@ -1,0 +1,52 @@
+{
+  "lessons": [
+    {
+      "id": "504cd2bf",
+      "title": "Qwen3 reasoning model retorna content vazio",
+      "problem": "Qwen3 e DeepSeek-R1 sao reasoning models que retornam content vazio e tudo no campo reasoning",
+      "solution": "Nunca usar reasoning models como default. Usar gemma4:e2b ou hermes3:8b como primario. Reasoning models por ultimo no fallback.",
+      "category": "models",
+      "tags": [],
+      "created": "2026-05-24 18:53:37",
+      "last_seen": "2026-05-24 18:53:37",
+      "occurrences": 1
+    },
+    {
+      "id": "25febb84",
+      "title": "TTS nativo nao funciona no CLI Windows",
+      "problem": "O text_to_speech nativo gera MP3 mas nao toca no terminal CLI",
+      "solution": "Usar execute_code com edge-tts + ffmpeg + PowerShell SoundPlayer. Script em tools/tts_fala.py",
+      "category": "tts",
+      "tags": [],
+      "created": "2026-05-24 18:53:51",
+      "last_seen": "2026-05-24 18:53:51",
+      "occurrences": 1
+    },
+    {
+      "id": "4fb73c33",
+      "title": "Gateway restart nao sobe sozinho",
+      "problem": "hermes gateway restart mata o processo mas nao sobe um novo",
+      "solution": "Usar hermes gateway install e responder Y Y n aos prompts. Ou rodar watchdog_gateway.py",
+      "category": "gateway",
+      "tags": [],
+      "created": "2026-05-24 18:54:15",
+      "last_seen": "2026-05-24 18:54:15",
+      "occurrences": 1
+    },
+    {
+      "id": "93b79e52",
+      "title": "Git push com PAT falhando 403",
+      "problem": "PAT tokens podem mostrar push True na API mas falhar no git push",
+      "solution": "Usar Fine-grained token com Contents Write ou Classic PAT com escopo repo completo. Alternativa: push via API do GitHub.",
+      "category": "git",
+      "tags": [],
+      "created": "2026-05-24 18:55:33",
+      "last_seen": "2026-05-24 18:55:33",
+      "occurrences": 1
+    }
+  ],
+  "stats": {
+    "total": 4,
+    "applied": 0
+  }
+}

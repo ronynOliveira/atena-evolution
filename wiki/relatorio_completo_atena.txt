@@ -1,0 +1,101 @@
+RELATÓRIO COMPLETO DO PROJETO ATENA (PÓS-REFATORAÇÃO)
+
+Data: 04 de Outubro de 2025
+Autor: Gemini (Analista de Sistemas e Engenheiro de IA)
+
+---
+
+### 1. RESUMO DAS MUDANÇAS REALIZADAS
+
+O projeto Atena, anteriormente distribuído em múltiplas pastas (`assistente Atena`, `projetoAtena`, etc.), passou por um processo completo de análise, refatoração e consolidação. O objetivo foi criar uma base de código unificada, organizada e de fácil manutenção.
+
+As seguintes ações foram executadas:
+
+- **Consolidação:** Todos os artefatos de projeto relevantes foram centralizados no diretório `Atena_Consolidada`.
+- **Estruturação Modular:** Foi criada uma estrutura de pastas lógica que separa as responsabilidades:
+  - `backend/`: Contém a aplicação servidora em Python.
+  - `frontend/`: Contém a interface do usuário em React.
+  - `desktop/`: Contém o wrapper da aplicação desktop (Tauri).
+  - `docs/`: Centraliza a documentação do projeto.
+  - `_arquivos_antigos/`: Arquiva todos os arquivos legados e soltos para referência futura, limpando o diretório raiz.
+- **Criação de Scripts:** Foram criados os scripts `run_dev.bat` e `build_app.bat` para automatizar e simplificar os processos de desenvolvimento e compilação.
+- **Documentação:** O arquivo `README.md` foi criado para servir como um guia rápido e central para o projeto.
+- **Verificação:** O processo de build foi executado e corrigido com sucesso, validando a nova estrutura e gerando os instaladores da aplicação.
+- **Limpeza:** Todos os diretórios e arquivos antigos e redundantes foram devidamente arquivados.
+
+---
+
+### 2. ARQUITETURA E DETALHES DOS MÓDULOS
+
+**2.1. Visão Geral da Arquitetura**
+
+Atena é uma **aplicação de desktop híbrida**. Ela consiste em um backend local que serve uma API e uma interface de usuário web (frontend) que é exibida em uma janela de desktop nativa.
+
+**2.2. Módulo Backend**
+
+- **Localização:** `Atena_Consolidada/backend/`
+- **Tecnologia:** Python, com o framework web **FastAPI**.
+- **Funcionalidade Principal:**
+  - Servir uma API RESTful na porta `8000`.
+  - Orquestrar o modelo de linguagem grande (LLM) localmente, utilizando `llama-cpp-python` e/ou `ollama`.
+  - Gerenciar as bases de conhecimento (documentos, textos) e os bancos de dados vetoriais (FAISS, ChromaDB) para a funcionalidade de RAG (Geração Aumentada por Recuperação).
+  - Executar tarefas de automação e visão computacional (`Playwright`, `OpenCV`).
+- **Ponto de Acesso:** A API fica disponível em `http://127.0.0.1:8000` quando o backend está em execução.
+
+**2.3. Módulo Frontend**
+
+- **Localização:** `Atena_Consolidada/frontend/`
+- **Tecnologia:** JavaScript/TypeScript, com a biblioteca **React** e o empacotador **Vite**.
+- **Funcionalidade Principal:**
+  - Renderizar toda a interface gráfica do usuário (UI) com a qual o usuário interage.
+  - Utiliza a biblioteca de componentes `shadcn/ui` para um design moderno.
+- **Comunicação:** A interface faz chamadas HTTP para a API do backend (`http://127.0.0.1:8000`) para enviar comandos, buscar respostas e interagir com a IA.
+
+**2.4. Módulo Desktop**
+
+- **Localização:** `Atena_Consolidada/desktop/`
+- **Tecnologia:** **Tauri** (framework baseado em Rust).
+- **Funcionalidade Principal:**
+  - Empacotar o frontend React em uma aplicação de desktop nativa e performática.
+  - Gerar os instaladores (`.msi` e `.exe`) para distribuição no Windows.
+  - Gerenciar a janela da aplicação e a comunicação segura entre o frontend e o sistema operacional.
+
+---
+
+### 3. COMO UTILIZAR O PROJETO
+
+Consulte o arquivo `README.md` na pasta `Atena_Consolidada` para instruções detalhadas. O resumo é:
+
+**3.1. Para Desenvolvimento:**
+- Execute o script `run_dev.bat`. Ele iniciará o servidor do backend e o servidor de desenvolvimento do frontend simultaneamente em janelas separadas.
+
+**3.2. Para Compilação (Build):**
+- Execute o script `build_app.bat`. Ele compilará primeiro o frontend e, em seguida, usará o resultado para gerar os instaladores finais do desktop na pasta `desktop/src-tauri/target/release`.
+
+---
+
+### 4. USO E CONFIGURAÇÃO DA API E IA
+
+**4.1. Comunicação Frontend-Backend (API)**
+
+A comunicação é direta via HTTP. O frontend (React) envia requisições para o backend (FastAPI). A permissão para esta comunicação está configurada no arquivo `desktop/src-tauri/tauri.conf.json`, na seção `tauri.allowlist.http.scope`, que autoriza o acesso a `http://127.0.0.1:8000/*`.
+
+**4.2. Como Fazer a Atena Assimilar uma Nova LLM**
+
+A troca do modelo de IA é um processo simples:
+
+1.  **Obtenha o Modelo:** Baixe um novo modelo de linguagem no formato **GGUF** (disponíveis em sites como o Hugging Face).
+2.  **Armazene o Modelo:** Coloque o arquivo `.gguf` em um local acessível. Recomenda-se a pasta `backend/models/`.
+3.  **Atualize a Configuração:**
+    - Abra o arquivo `.env` localizado na pasta `backend/`.
+    - Altere a variável `ATENA_LLM_LOCAL_MODEL_PATH` para o caminho completo do novo modelo.
+    - Exemplo: `ATENA_LLM_LOCAL_MODEL_PATH="C:/caminho/para/seu/novo_modelo.gguf"`
+4.  **Reinicie o Backend:** Pare e inicie novamente o backend (ou use o script `run_dev.bat`) para que ele carregue o novo modelo em memória.
+
+---
+
+### 5. PRÓXIMOS PASSOS E RECOMENDAÇÕES
+
+- **Ícones da Aplicação:** O build foi concluído com um ícone padrão. Recomenda-se criar e adicionar os ícones desejados (formatos `.ico`, `.icns`, `.png`) na pasta `desktop/src-tauri/icons/` e atualizar a seção "icon" do arquivo `tauri.conf.json`.
+- **Revisão dos Arquivos Antigos:** A pasta `_arquivos_antigos` contém todo o material legado. Recomenda-se uma revisão para extrair qualquer informação útil e descartar o restante.
+- **Testes:** A nova estrutura modular facilita a criação de testes unitários e de integração para cada módulo (`backend`, `frontend`), o que é altamente recomendado para garantir a estabilidade e a qualidade do projeto a longo prazo.
